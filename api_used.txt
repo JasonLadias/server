@@ -1,0 +1,20 @@
+BCH
+    UTXO : bitcore.io | ----
+    BROADCAST : blockchair.com | 1440 req/day
+BSV
+    UTXO : mattercloud.net | $50/mo -> 1req/sec | works without keys
+    BROADCAST : blockchair.com | 1440 req/day
+BTC 
+    UTXO: bitpay.com | no limit or account mentioned
+    BROADCAST : blockchair.com | 1440 req/day
+DGB
+    UTXO: digiexplorer.info | down at the time
+    BROADCAST: digiexplorer.info
+EOS
+    API: greymass.com | no limit or account mentioned
+ETH
+    BLOCKCHAIN INFO: infura.io | 100000 req/day free with account
+    BROADCAST: etherscan.io | 5 call/sec with account
+LTC 
+    UTXO: litecore.io | --
+    BROADCAST : blockchair.com | 1440 req/day

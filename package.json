@@ -1,0 +1,42 @@
+{
+  "name": "nodejs-complete-guide",
+  "version": "1.0.0",
+  "description": "Complete Node.js Guide",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js > trans.log 2> error.log",
+    "start-server": "node app.js"
+  },
+  "author": "Ladias Iason",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^1.19.4"
+  },
+  "dependencies": {
+    "BigInt": "^5.5.3",
+    "axios": "^0.19.2",
+    "bip39": "^3.0.2",
+    "body-parser": "^1.19.0",
+    "bs58check": "^2.1.2",
+    "bsv": "^1.5.3",
+    "create-hash": "^1.2.0",
+    "digibyte": "^0.15.8",
+    "eos-wallet": "^0.1.0",
+    "eosjs": "^20.0.3",
+    "ethereumjs-tx": "^2.1.2",
+    "ethereumjs-util": "^7.0.0",
+    "express": "^4.17.1",
+    "hdkey": "^1.1.2",
+    "http": "0.0.1-security",
+    "human-standard-token-abi": "^2.0.0",
+    "litecore-lib": "^0.13.22",
+    "lodash": "^4.17.15",
+    "node-fetch": "^2.6.0",
+    "request": "^2.88.2",
+    "secure-random": "^1.1.2",
+    "util": "^0.12.3",
+    "web3": "^1.2.7",
+    "wif": "^2.0.6"
+  }
+}
