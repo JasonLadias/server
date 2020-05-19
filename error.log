@@ -1,1 +1,45 @@
-^C
+C:\Users\Jason\Desktop\server\coin_source_code\bsv\trans.js:21
+            .then((response)){
+                             ^
+
+SyntaxError: Unexpected token '{'
+    at Module._compile (internal/modules/cjs/loader.js:895:18)
+    at Object.Module._extensions..js (internal/modules/cjs/loader.js:995:10)
+    at Module.load (internal/modules/cjs/loader.js:815:32)
+    at Function.Module._load (internal/modules/cjs/loader.js:727:14)
+    at Module.require (internal/modules/cjs/loader.js:852:19)
+    at require (internal/modules/cjs/helpers.js:74:18)
+    at Object.<anonymous> (C:\Users\Jason\Desktop\server\controllers\transaction.js:2:18)
+    at Module._compile (internal/modules/cjs/loader.js:959:30)
+    at Object.Module._extensions..js (internal/modules/cjs/loader.js:995:10)
+    at Module.load (internal/modules/cjs/loader.js:815:32)
+(node:9128) UnhandledPromiseRejectionWarning: ReferenceError: rawtx is not defined
+    at C:\Users\Jason\Desktop\server\coin_source_code\bsv\trans.js:39:31
+    at processTicksAndRejections (internal/process/task_queues.js:93:5)
+(node:9128) UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). (rejection id: 1)
+(node:9128) [DEP0018] DeprecationWarning: Unhandled promise rejections are deprecated. In the future, promise rejections that are not handled will terminate the Node.js process with a non-zero exit code.
+(node:8608) UnhandledPromiseRejectionWarning: ReferenceError: rawtx is not defined
+    at C:\Users\Jason\Desktop\server\coin_source_code\bsv\trans.js:39:31
+    at processTicksAndRejections (internal/process/task_queues.js:93:5)
+(node:8608) UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). (rejection id: 1)
+(node:8608) [DEP0018] DeprecationWarning: Unhandled promise rejections are deprecated. In the future, promise rejections that are not handled will terminate the Node.js process with a non-zero exit code.
+(node:12328) UnhandledPromiseRejectionWarning: ReferenceError: rawtx is not defined
+    at C:\Users\Jason\Desktop\server\coin_source_code\bsv\trans.js:39:31
+    at processTicksAndRejections (internal/process/task_queues.js:93:5)
+(node:12328) UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). (rejection id: 1)
+(node:12328) [DEP0018] DeprecationWarning: Unhandled promise rejections are deprecated. In the future, promise rejections that are not handled will terminate the Node.js process with a non-zero exit code.
+C:\Users\Jason\Desktop\server\coin_source_code\bsv\trans.js:35
+                    axios.({
+                          ^
+
+SyntaxError: Unexpected token '('
+    at Module._compile (internal/modules/cjs/loader.js:895:18)
+    at Object.Module._extensions..js (internal/modules/cjs/loader.js:995:10)
+    at Module.load (internal/modules/cjs/loader.js:815:32)
+    at Function.Module._load (internal/modules/cjs/loader.js:727:14)
+    at Module.require (internal/modules/cjs/loader.js:852:19)
+    at require (internal/modules/cjs/helpers.js:74:18)
+    at Object.<anonymous> (C:\Users\Jason\Desktop\server\controllers\transaction.js:2:18)
+    at Module._compile (internal/modules/cjs/loader.js:959:30)
+    at Object.Module._extensions..js (internal/modules/cjs/loader.js:995:10)
+    at Module.load (internal/modules/cjs/loader.js:815:32)
