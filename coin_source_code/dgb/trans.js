@@ -2,6 +2,7 @@ const dgbWallet = require('./wallet')
 
 let dgb = require('digibyte')
 let request = require('request')
+let axios = require('axios')
 
 exports.trans = async (addressNo, addressTo, value) => {
     //retrieving bch address & private key
@@ -17,6 +18,61 @@ exports.trans = async (addressNo, addressTo, value) => {
 
     let promise = new Promise((resolve, reject) => {
 
+
+        axios.get('https://digiexplorer.info/api/addr/'+address+'/utxo')
+            .then((res) => {
+
+                console.log(res.data)
+                if (res.data) {
+                    
+                    let utxos = res.data
+
+                    let tx = new dgb.Transaction() //use dgb library to create a transaction
+                        .from(utxos)
+                        .to(addressTo, amount)
+                        .fee(fee)
+                        .change(address)
+                        .sign(WIF)
+                        .serialize();
+
+                    axios({
+                        method: 'post',
+                        url: 'https://digiexplorer.info/api/tx/send',
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({
+                            "rawtx": tx
+                        })
+                    })
+                        .then((res) => {
+                            console.log(res.data)
+                            if (res.data.data.transaction_hash) {
+                                resolve(res.data.data.transaction_hash)
+                            } else {
+                                resolve(-8)
+                            }
+                        })
+                        .catch((err) => {
+                            if (err.isAxiosError) {
+                                resolve(-7)
+                            } else {
+                                resolve(-9)
+                            }
+                        })
+
+                } else {
+                    resolve(-5)
+                }
+            })
+            .catch((err) => {
+                if (err.isAxiosError) {
+                    resolve(-4)
+                } else {
+                    resolve(-6)
+                }
+            })
+
+
+        /*
         getUTXOs(address)
             .then((utxos) => {
                 try {
@@ -53,7 +109,7 @@ exports.trans = async (addressNo, addressTo, value) => {
                 }
 
             })
-
+*/
     })
 
     let status = await promise

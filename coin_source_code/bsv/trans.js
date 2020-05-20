@@ -1,7 +1,6 @@
 const bsvWallet = require('./wallet')
 
 let bsv = require('bsv')
-let request = require('request')
 let axios = require('axios')
 
 exports.trans = async (addressNo, addressTo, value) => {
@@ -41,110 +40,36 @@ exports.trans = async (addressNo, addressTo, value) => {
                             })
                         })
                             .then((res) => {
-                                console.log(res)
+                                //console.log(res)
                                 if (res.data.data.transaction_hash) {
                                     resolve(res.data.data.transaction_hash)
                                 } else {
-                                    console.log("API Server unexpected response")
-                                    resolve(-2)
+                                    resolve(-8)
                                 }
                             })
                             .catch((err) => {
                                 if(err.isAxiosError){
-                                    console.log("API Server error")
+                                    resolve(-7)
                                 }else{
-                                    console.log("something shitty happen")
+                                    resolve(-9)
                                 }
-                                
-                                resolve(-2)
                             })
 
                     } else {
-                        console.log("build error")
-                        resolve(-1)
+                        resolve(-5)
                     }
                 })
                 .catch((err) => {
                     if(err.isAxiosError){
-                        console.log("UTXO API Server error")
+                        resolve(-4)
                     }else{
-                        console.log("something shitty happen")
+                        resolve(-6)
                     }
-                    resolve(-1)
                 })
-        }
-
-
-        /*
-        getUTXOs(address)
-            .then((utxos) => {
-                try {
-                    //we are building the transaction 
-                    let tx = new bsv.Transaction() //use bsv library to create a transaction
-                        .from(utxos)
-                        .to(addressTo, amount)
-                        .fee(fee)
-                        .change(address)
-                        .sign(WIF)
-                        .serialize();
-
-                    broadcastTX(tx)
-                        .then((txid) => {
-                            console.log("BSV: Transaction OK | addressNo: " + addressNo + " | address: " + addressTo + " | amount: " + value + " | txid : " + txid)
-                            resolve(txid)
-                        })
-                        .catch((error) => {
-                            console.error("BSV: Api Error | addressNo: " + addressNo + " | addressTo: " + addressTo + " | amount: " + value)
-                            resolve(-2)
-                        })
-                } catch (error) {
-                    console.error("BSV: Transaction Build Error | addressNo: " + addressNo + " | addressTo: " + addressTo + " | amount: " + value)
-                    resolve(-1)
-                }
-
-            })
-
-            */
-    )
+        })
 
     let status = await promise
 
     return status
 
-}
-
-//manually hit an insight api to retrieve utxos of address
-function getUTXOs(address) {
-    return new Promise((resolve, reject) => {
-        request({
-            uri: 'https://api.mattercloud.net/api/v3/main/address/' + address + '/utxo',
-            json: true
-        },
-            (error, response, body) => {
-                if (error) reject(error);
-                resolve(body)
-            }
-        )
-    })
-}
-
-//broadcast the transaction to the blockchair
-function broadcastTX(rawtx) {
-    return new Promise((resolve, reject) => {
-        request({
-            uri: 'https://api.blockchair.com/bitcoin-sv/push/transaction',
-            method: 'POST',
-            "content-type": "application/json",
-            json: {
-                "data": rawtx
-            }
-        },
-            (error, response, body) => {
-                if (error) {
-                    reject(error)
-                };
-                resolve(body.data.transaction_hash)
-            }
-        )
-    })
 }

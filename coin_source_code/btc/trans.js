@@ -1,7 +1,7 @@
 const btcWallet = require('./wallet')
 
-const request = require('request')
 const wif = require('wif')
+const axios = require('axios')
 const bitcore = require('bitcore-lib')
 
 //will send the BTC transaction having as input the number, receiving address & amount
@@ -20,36 +20,70 @@ exports.trans = async (addressNo, addressTo, value) => {
     let promise = new Promise((resolve, reject) => {
         //getting UTXOs for the specific address
 
-        getUTXOs(address)
-            .then((utxos) => {
-                try {
-                    console.log(utxos)
-                    //we are building the transaction 
+
+        axios({
+            method: 'post',
+            url: 'https://insight.bitpay.com/api/addrs/utxo',
+            headers: { "Content-Type": "application/json" },
+            data: JSON.stringify({
+                "addrs": address
+            })
+        })
+            .then((res) => {
+                if (res.data) {
+                    let utxos = res.data
+
                     let tx = new bitcore.Transaction() //use bitcore-lib-cash to create a transaction
                         .from(utxos)
                         .to(addressTo, amount)
                         .fee(fee)
                         .change(address)
                         .sign(WIF)
-                        .serialize();
+                        .serialize()
 
-                    broadcastTX(tx.toString('hex'))
-                        .then((txid) => {
-                            console.log("BTC: Transaction OK | addressNo: " + addressNo + " | address: " + addressTo + " | amount: " + value + " | txid : " + txid)
-                            resolve(txid)
+
+                    axios({
+                        method: 'post',
+                        url: 'https://api.blockchair.com/bitcoin/push/transaction',
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({
+                            "data": tx
                         })
-                        .catch((error) => {
-                            console.error("BTC: Api Error | addressNo: " + addressNo + " | addressTo: " + addressTo + " | amount: " + value)
-                            resolve(-2)
+                    })
+                        .then((res) => {
+                            //console.log(res)
+                            if (res.data.data.transaction_hash) {
+                                resolve(res.data.data.transaction_hash)
+                            } else {
+                                resolve(-8)
+                            }
                         })
-                } catch (error) {
-                    console.error("BTC: Transaction Build Error | addressNo: " + addressNo + " | addressTo: " + addressTo + " | amount: " + value)
-                    resolve(-1)
+                        .catch((err) => {
+                            if (err.isAxiosError) {
+                                resolve(-7)
+                            } else {
+                                resolve(-9)
+                            }
+                        })
+
+                } else {
+                    resolve(-5)
                 }
-
+            })
+            .catch((err) => {
+                if (err.isAxiosError) {
+                    resolve(-4)
+                } else {
+                    resolve(-6)
+                }
             })
 
+
+
     })
+
+
+
 
     let status = await promise
 
@@ -57,41 +91,73 @@ exports.trans = async (addressNo, addressTo, value) => {
 
 }
 
-function broadcastTX(rawtx) {
-    return new Promise((resolve, reject) => {
-        request({
-            uri: 'https://api.blockchair.com/bitcoin/push/transaction',
-            method: 'POST',
-            "content-type": "application/json",
-            json: {
-                "data": rawtx
-            }
-        },
-            (error, response, body) => {
-                if (error) {
-                    reject(error)
-                }
-                console.log(response)
-                resolve(body.data.transaction_hash)
-            }
-        )
-    })
-}
 
-function getUTXOs(address) {
-    return new Promise((resolve, reject) => {
-        request({
-            uri: 'https://insight.bitpay.com/api/addrs/utxo',
-            method: 'POST',
-            "content-type": "application/json",
-            json: {
-                "addrs": address
-            }
-        },
-            (error, response, body) => {
-                if (error) reject(error);
-                resolve(body)
-            }
-        )
-    })
-}
+/*
+axios.get('https://blockchain.info/unspent?cors=true&active=' + address)
+            .then((res) => {
+
+                if (res.data.unspent_outputs) {
+                    let utxos = res.data.unspent_outputs
+
+                    let utxo = []
+                    for (let i = 0; i < utxos.length; i++) {
+                        utxo = [
+                            ...utxo,
+                            {
+                                "address": JSON.stringify(address),
+                                "txId": utxos[i]['tx_hash'],
+                                "outputIndex": utxos[i]['tx_output_n'],
+                                "script": utxos[i]['script'],
+                                "satoshis": utxos[i]['value']
+                            }
+                        ]
+                    }
+
+                    console.log(utxo)
+
+                    let tx = new bitcore.Transaction() //use bitcore-lib-cash to create a transaction
+                        .from(utxo)
+                        .to(addressTo, amount)
+                        .fee(fee)
+                        .change(address)
+                        .sign(WIF)
+                        .serialize()
+
+
+                    axios({
+                        method: 'post',
+                        url: 'https://api.blockchair.com/bitcoin/push/transaction',
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({
+                            "data": tx
+                        })
+                    })
+                        .then((res) => {
+                            //console.log(res)
+                            if (res.data.data.transaction_hash) {
+                                resolve(res.data.data.transaction_hash)
+                            } else {
+                                resolve(-8)
+                            }
+                        })
+                        .catch((err) => {
+                            if (err.isAxiosError) {
+                                resolve(-7)
+                            } else {
+                                resolve(-9)
+                            }
+                        })
+
+                } else {
+                    resolve(-5)
+                }
+            })
+            .catch((err) => {
+                if (err.isAxiosError) {
+                    resolve(-4)
+                } else {
+                    resolve(-6)
+                }
+            })
+
+*/
