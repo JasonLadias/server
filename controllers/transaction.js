@@ -77,10 +77,18 @@ exports.postTransaction = async (req, res, next) => {
         case 'LTC':
             //LTC transaction
             status = await ltcTrans.trans(addressNo, addressTo, value)
-            if (status == -1) {
-                res.send(JSON.stringify({ status: "Error", type: "4", reason: "Transaction Build error" }))
-            } else if (status == -2) {
-                res.send(JSON.stringify({ status: "Error", type: "5", reason: "Transaction API error" }))
+            if (status == -4) {
+                res.send(JSON.stringify({ status: "Error", type: "4", reason: "UTXO server down" }))
+            } else if (status == -5) {
+                res.send(JSON.stringify({ status: "Error", type: "5", reason: "UTXO Server unexpected response" }))
+            } else if (status == -6) {
+                res.send(JSON.stringify({ status: "Error", type: "6", reason: "Transaction build error" }))
+            } else if (status == -7) {
+                res.send(JSON.stringify({ status: "Error", type: "7", reason: "Broadcast server down" }))
+            } else if (status == -8) {
+                res.send(JSON.stringify({ status: "Error", type: "8", reason: "Broadcast server unexpected response ***Possible send of money***" }))
+            } else if (status == -9) {
+                res.send(JSON.stringify({ status: "Error", type: "9", reason: "Broadcast server unreadable response ***Possible send of money***" }))
             } else {
                 res.send(JSON.stringify({ status: "OK", coinName: coinName, addressNo: addressNo, addressTo: addressTo, value: value, txid: status }))
             }
