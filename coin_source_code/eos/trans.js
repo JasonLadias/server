@@ -40,14 +40,23 @@ exports.trans = async (addressTo, value, memo) => {
                 blocksBehind: 3,
                 expireSeconds: 30,
             }).then(result => {
-                console.log("EOS: Transaction OK | address: " + addressTo + " | amount: " + value + " | memo: " + memo +" | txid: "+result.transaction_id)
-                resolve(result.transaction_id)
+                if(result.transaction_id){
+                    resolve(result.transaction_id)
+                }else{
+                    resolve(-8)
+                }
+                
             }).catch(error => {
-                console.error("EOS: " + error.json.code + " " + error.json.message + " | address: " + addressTo + " | amount: " + value + " | memo: " + memo)
-                resolve(-2)
+                console.log(error)
+                if(error.isFetchError){
+                    resolve(-7)
+                }else{
+                    resolve(-6)
+                }
+                
             });
         } catch (e) {
-            resolve(-1)
+            resolve(-6)
         }
     })
 
