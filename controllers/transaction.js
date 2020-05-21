@@ -114,10 +114,18 @@ exports.postTransaction = async (req, res, next) => {
             break
         case 'ETH':
             status = await ethTrans.trans(addressNo, addressTo, value)
-            if (status == -1) {
-                res.send(JSON.stringify({ status: "Error", type: "4", reason: "Transaction Build error" }))
-            } else if (status == -2) {
-                res.send(JSON.stringify({ status: "Error", type: "5", reason: "Transaction API error" }))
+            if (status == -4) {
+                res.send(JSON.stringify({ status: "Error", type: "4", reason: "UTXO server down" }))
+            } else if (status == -5) {
+                res.send(JSON.stringify({ status: "Error", type: "5", reason: "UTXO Server unexpected response" }))
+            } else if (status == -6) {
+                res.send(JSON.stringify({ status: "Error", type: "6", reason: "Transaction build error" }))
+            } else if (status == -7) {
+                res.send(JSON.stringify({ status: "Error", type: "7", reason: "Broadcast server down" }))
+            } else if (status == -8) {
+                res.send(JSON.stringify({ status: "Error", type: "8", reason: "Broadcast server unexpected response ***Possible send of money***" }))
+            } else if (status == -9) {
+                res.send(JSON.stringify({ status: "Error", type: "9", reason: "Broadcast server unreadable response ***Possible send of money***" }))
             } else {
                 res.send(JSON.stringify({ status: "OK", coinName: coinName, addressNo: addressNo, addressTo: addressTo, value: value, txid: status }))
             }
@@ -137,30 +145,54 @@ exports.postTransaction = async (req, res, next) => {
         //ETH Tokens
         case 'POWR':
             status = await ethTokenTrans.trans(addressNo, addressTo, value, '0x595832f8fc6bf59c85c527fec3740a1b7a361269', 6)
-            if (status == -1) {
-                res.send(JSON.stringify({ status: "Error", type: "4", reason: "Transaction Build error" }))
-            } else if (status == -2) {
-                res.send(JSON.stringify({ status: "Error", type: "5", reason: "Transaction API error" }))
+            if (status == -4) {
+                res.send(JSON.stringify({ status: "Error", type: "4", reason: "UTXO server down" }))
+            } else if (status == -5) {
+                res.send(JSON.stringify({ status: "Error", type: "5", reason: "UTXO Server unexpected response" }))
+            } else if (status == -6) {
+                res.send(JSON.stringify({ status: "Error", type: "6", reason: "Transaction build error" }))
+            } else if (status == -7) {
+                res.send(JSON.stringify({ status: "Error", type: "7", reason: "Broadcast server down" }))
+            } else if (status == -8) {
+                res.send(JSON.stringify({ status: "Error", type: "8", reason: "Broadcast server unexpected response ***Possible send of money***" }))
+            } else if (status == -9) {
+                res.send(JSON.stringify({ status: "Error", type: "9", reason: "Broadcast server unreadable response ***Possible send of money***" }))
             } else {
                 res.send(JSON.stringify({ status: "OK", coinName: coinName, addressNo: addressNo, addressTo: addressTo, value: value, txid: status }))
             }
             break
         case 'OMG':
             status = await ethTokenTrans.trans(addressNo, addressTo, value, '0xd26114cd6EE289AccF82350c8d8487fedB8A0C07', 18)
-            if (status == -1) {
-                res.send(JSON.stringify({ status: "Error", type: "4", reason: "Transaction Build error" }))
-            } else if (status == -2) {
-                res.send(JSON.stringify({ status: "Error", type: "5", reason: "Transaction API error" }))
+            if (status == -4) {
+                res.send(JSON.stringify({ status: "Error", type: "4", reason: "UTXO server down" }))
+            } else if (status == -5) {
+                res.send(JSON.stringify({ status: "Error", type: "5", reason: "UTXO Server unexpected response" }))
+            } else if (status == -6) {
+                res.send(JSON.stringify({ status: "Error", type: "6", reason: "Transaction build error" }))
+            } else if (status == -7) {
+                res.send(JSON.stringify({ status: "Error", type: "7", reason: "Broadcast server down" }))
+            } else if (status == -8) {
+                res.send(JSON.stringify({ status: "Error", type: "8", reason: "Broadcast server unexpected response ***Possible send of money***" }))
+            } else if (status == -9) {
+                res.send(JSON.stringify({ status: "Error", type: "9", reason: "Broadcast server unreadable response ***Possible send of money***" }))
             } else {
                 res.send(JSON.stringify({ status: "OK", coinName: coinName, addressNo: addressNo, addressTo: addressTo, value: value, txid: status }))
             }
             break
         case 'LEND':
             status = await ethTokenTrans.trans(addressNo, addressTo, value, '0x80fB784B7eD66730e8b1DBd9820aFD29931aab03', 18)
-            if (status == -1) {
-                res.send(JSON.stringify({ status: "Error", type: "4", reason: "Transaction Build error" }))
-            } else if (status == -2) {
-                res.send(JSON.stringify({ status: "Error", type: "5", reason: "Transaction API error" }))
+            if (status == -4) {
+                res.send(JSON.stringify({ status: "Error", type: "4", reason: "UTXO server down" }))
+            } else if (status == -5) {
+                res.send(JSON.stringify({ status: "Error", type: "5", reason: "UTXO Server unexpected response" }))
+            } else if (status == -6) {
+                res.send(JSON.stringify({ status: "Error", type: "6", reason: "Transaction build error" }))
+            } else if (status == -7) {
+                res.send(JSON.stringify({ status: "Error", type: "7", reason: "Broadcast server down" }))
+            } else if (status == -8) {
+                res.send(JSON.stringify({ status: "Error", type: "8", reason: "Broadcast server unexpected response ***Possible send of money***" }))
+            } else if (status == -9) {
+                res.send(JSON.stringify({ status: "Error", type: "9", reason: "Broadcast server unreadable response ***Possible send of money***" }))
             } else {
                 res.send(JSON.stringify({ status: "OK", coinName: coinName, addressNo: addressNo, addressTo: addressTo, value: value, txid: status }))
             }
