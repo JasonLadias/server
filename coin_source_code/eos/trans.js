@@ -1,5 +1,6 @@
 const eosWallet = require('./wallet')
 
+let timestamp = require('time-stamp')
 const { Api, JsonRpc, RpcError } = require('eosjs')
 const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig')      // development only
 const fetch = require('node-fetch');                                    // node only; not needed in browsers
@@ -40,15 +41,21 @@ exports.trans = async (addressTo, value, memo) => {
                 blocksBehind: 3,
                 expireSeconds: 30,
             }).then(result => {
+                console.log("***Response***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
+                console.log(result)
                 if(result.transaction_id){
+                    console.log("Transaction OK")
                     resolve(result.transaction_id)
                 }else{
+                    console.error("8 - Broadcast server unexpected response")
                     resolve(-8)
                 }
                 
             }).catch(error => {
-                console.log(error)
+                console.error("***Response***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
+                console.error(error)
                 if(error.isFetchError){
+                    console.error("7 - Broadcast Server Down")
                     resolve(-7)
                 }else{
                     resolve(-6)

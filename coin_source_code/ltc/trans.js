@@ -1,8 +1,8 @@
 const ltcWallet = require('./wallet')
 
 let ltc = require('litecore-lib')
-let request = require('request')
 let axios = require('axios')
+let timestamp = require('time-stamp')
 
 exports.trans = async (addressNo, addressTo, value) => {
     //retrieving bch address & private key
@@ -31,25 +31,38 @@ exports.trans = async (addressNo, addressTo, value) => {
                         .sign(WIF)
                         .serialize();
                     
-                    axios({
+                    let req = {
                         method: 'post',
                         url: 'https://api.blockchair.com/litecoin/push/transaction',
                         headers: { "Content-Type": "application/json" },
                         data: JSON.stringify({
                             "data": tx
                         })
-                    })
+                    }
+
+                    console.log("***Request***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
+                    console.log(req)
+                    
+                    axios(req)
                         .then((res) => {
+                            console.log("***Response***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
+                            console.log(res)
                             if (res.data.data.transaction_hash) {
+                                console.log("Transaction OK")
                                 resolve(res.data.data.transaction_hash)
                             } else {
+                                console.error("8 - Broadcast server unexpected response")
                                 resolve(-8)
                             }
                         })
                         .catch((err) => {
+                            console.error("***Response***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
+                            console.error(err)
                             if (err.isAxiosError) {
+                                console.error("7 - Broadcast Server Down")
                                 resolve(-7)
                             } else {
+                                console.error("9 - Broadcast server unreadable response")
                                 resolve(-9)
                             }
                         })

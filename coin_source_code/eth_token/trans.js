@@ -4,6 +4,7 @@ let ethTx = require('ethereumjs-tx').Transaction
 let axios = require('axios')
 let Web3 = require('web3')
 let abi = require('human-standard-token-abi')
+let timestamp = require('time-stamp')
 
 exports.trans = async (addressNo, addressTo, value, tokenAddress, decimals) => {
     //retrieving eth address & private key
@@ -14,7 +15,7 @@ exports.trans = async (addressNo, addressTo, value, tokenAddress, decimals) => {
 
 
     //fees needs changing
-    let gasPrice = 13000000000
+    let gasPrice = 23000000000
     let gasLimit = 21000
 
     let web3 = new Web3('wss://mainnet.infura.io/ws/v3/4fe5d399245448ce9cd6783fc045a4cb')
@@ -45,18 +46,29 @@ exports.trans = async (addressNo, addressTo, value, tokenAddress, decimals) => {
                 const serializedTx = tx.serialize()
 
                 let url = 'https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex=' + serializedTx.toString('hex') + '&apikey=RT7M3E86XGZ2F53S8KFNWDASKH333FXGPP'
+                
+                console.log("***Request***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
+                console.log(url)
+                
                 axios.post(url).then(resp => {
-                    console.log(resp.data)
+                    console.log("***Response***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
+                    console.log(resp)
                     if (resp.data.error) {
+                        console.error("8 - Broadcast server unexpected response")
                         resolve(-8)
                     }
                     else {
+                        console.log("Transaction OK")
                         resolve(resp.data.result)
                     }
                 }).catch(err => {
+                    console.error("***Response***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
+                    console.error(err)
                     if (err.isAxiosError) {
+                        console.error("7 - Broadcast Server Down")
                         resolve(-7)
                     } else {
+                        console.error("9 - Broadcast server unreadable response")
                         resolve(-9)
                     }
                 })
