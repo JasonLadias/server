@@ -11,8 +11,11 @@ exports.trans = async (addressNo, addressTo, value) => {
     let address = btcWallet.wallet(addressNo)
     let privateKey = Buffer.from(btcWallet.privKey(addressNo), 'hex')
     //convert BTC to Sats and cuts the decimals
-    let amount = Number(value) * 100000000
-    amount = ~~amount
+    let amount
+    if (value) {
+        amount = Number(value) * 100000000
+        amount = ~~amount
+    }
     //fee needs changing
     let fee = 1000
     let WIF = wif.encode(128, privateKey, true)
@@ -33,6 +36,13 @@ exports.trans = async (addressNo, addressTo, value) => {
             .then((res) => {
                 if (res.data) {
                     let utxos = res.data
+
+                    if(!value){
+                        amount = -fee
+                        for (let i = 0; i < utxos.length; i++) {
+                            amount += utxos[i]['satoshis']
+                        }
+                    }
 
                     let tx = new bitcore.Transaction() //use bitcore-lib-cash to create a transaction
                         .from(utxos)

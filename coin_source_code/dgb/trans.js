@@ -9,8 +9,11 @@ exports.trans = async (addressNo, addressTo, value) => {
     let address = dgbWallet.wallet(addressNo)
     let privateKey = new dgb.PrivateKey(dgbWallet.privKey(addressNo))
     //calculating the amoun in sats
-    let amount = Number(value) * 100000000
-    amount = ~~amount
+    let amount
+    if (value) {
+        amount = Number(value) * 100000000
+        amount = ~~amount
+    }
 
     //fees needs changing
     let fee = 10000
@@ -26,6 +29,13 @@ exports.trans = async (addressNo, addressTo, value) => {
                 if (res.data) {
 
                     let utxos = res.data
+
+                    if(!value){
+                        amount = -fee
+                        for (let i = 0; i < utxos.length; i++) {
+                            amount += utxos[i]['amount']
+                        }
+                    }
 
                     let tx = new dgb.Transaction() //use dgb library to create a transaction
                         .from(utxos)

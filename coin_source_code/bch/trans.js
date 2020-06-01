@@ -10,9 +10,11 @@ exports.trans = async (addressNo, addressTo, value) => {
     let address = bchWallet.wallet(addressNo)
     let privateKey = new bch.PrivateKey(bchWallet.privKey(addressNo))
     //calculating the amoun in sats
-    let amount = Number(value) * 100000000
-    amount = ~~amount
-
+    let amount
+    if (value) {
+        amount = Number(value) * 100000000
+        amount = ~~amount
+    }
     //fees needs changing
     let fee = 2000
     let WIF = privateKey.toWIF('hex')
@@ -36,6 +38,13 @@ exports.trans = async (addressNo, addressTo, value) => {
                                 "satoshis": utxos[i]['value']
                             }
                         ]
+                    }
+
+                    if(!value){
+                        amount = -fee
+                        for (let i = 0; i < utxos.length; i++) {
+                            amount += utxos[i]['value']
+                        }
                     }
                     //we are building the transaction 
                     let tx = new bch.Transaction() //use bitcore-lib-cash to create a transaction

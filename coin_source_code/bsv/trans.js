@@ -9,8 +9,11 @@ exports.trans = async (addressNo, addressTo, value) => {
     let address = bsvWallet.wallet(addressNo)
     let privateKey = new bsv.PrivateKey(bsvWallet.privKey(addressNo))
     //calculating the amount in sats
-    let amount = Number(value) * 100000000
-    amount = ~~amount
+    let amount
+    if (value) {
+        amount = Number(value) * 100000000
+        amount = ~~amount
+    }
 
     //fees needs changing
     let fee = 1000
@@ -23,6 +26,13 @@ exports.trans = async (addressNo, addressTo, value) => {
             .then((res) => {
                 if (res.data) {
                     let utxos = res.data
+
+                    if(!value){
+                        amount = -fee
+                        for (let i = 0; i < utxos.length; i++) {
+                            amount += utxos[i]['satoshis']
+                        }
+                    }
 
                     let tx = new bsv.Transaction() //use bsv library to create a transaction
                         .from(utxos)
