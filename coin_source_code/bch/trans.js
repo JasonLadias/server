@@ -2,6 +2,7 @@ const bchWallet = require('./wallet')
 
 let bch = require('bitcore-lib-cash')
 let axios = require('axios')
+let timestamp = require('time-stamp')
 
 
 exports.trans = async (addressNo, addressTo, value) => {
@@ -13,7 +14,7 @@ exports.trans = async (addressNo, addressTo, value) => {
     amount = ~~amount
 
     //fees needs changing
-    let fee = 1000
+    let fee = 2000
     let WIF = privateKey.toWIF('hex')
 
     let promise = new Promise((resolve, reject) => {
@@ -45,25 +46,39 @@ exports.trans = async (addressNo, addressTo, value) => {
                         .sign(WIF)
                         .serialize();
 
-                    axios({
+
+                    let req = {
                         method: 'post',
                         url: 'https://api.blockchair.com/bitcoin-cash/push/transaction',
                         headers: { "Content-Type": "application/json" },
                         data: JSON.stringify({
                             "data": tx
                         })
-                    })
+                    }
+
+                    console.log("***Request***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
+                    console.log(req)
+
+                    axios(req)
                         .then((res) => {
+                            console.log("***Response***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
+                            console.log(res)
                             if (res.data.data.transaction_hash) {
+                                console.log("Transaction OK")
                                 resolve(res.data.data.transaction_hash)
                             } else {
+                                console.error("8 - Broadcast server unexpected response")
                                 resolve(-8)
                             }
                         })
                         .catch((err) => {
+                            console.error("***Response***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
+                            console.error(err)
                             if (err.isAxiosError) {
+                                console.error("7 - Broadcast Server Down")
                                 resolve(-7)
                             } else {
+                                console.error("9 - Broadcast server unreadable response")
                                 resolve(-9)
                             }
                         })

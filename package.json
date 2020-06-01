@@ -34,7 +34,9 @@
     "lodash": "^4.17.15",
     "node-fetch": "^2.6.0",
     "request": "^2.88.2",
+    "right-now": "^1.0.0",
     "secure-random": "^1.1.2",
+    "time-stamp": "^2.2.0",
     "util": "^0.12.3",
     "web3": "^1.2.7",
     "wif": "^2.0.6"
