@@ -10,15 +10,25 @@ const rpc = new JsonRpc('https://eos.greymass.com:443', { fetch })
 exports.trans = async (addressTo, value, memo) => {
     //get the privateKey
     let privateKey = eosWallet.privKey()
-    //calculating the amount
+    /*calculating the amount
+    let amount 
+    if(value) amount = value
+    else{
+        let tempAmount = await rpc.get_currency_balance('eosio.token', 'testeasybit1', 'EOS')
+        amount = tempAmount[0].match(/\d/g)
+        amount = amount.join("")
+        amount = Number(amount)/10000
+        console.log(amount)
+    }
+    */
     let amount = value
-
     let signatureProvider = new JsSignatureProvider([privateKey])
 
 
     let promise = new Promise((resolve, reject) => {
         try {
             const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() })
+        
 
             api.transact({
                 actions: [{

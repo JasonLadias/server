@@ -3,7 +3,7 @@ const ethWallet = require('./wallet')
 let ethTx = require('ethereumjs-tx').Transaction
 let axios = require('axios')
 let Web3 = require('web3')
-let timestamp = require('time-stamp') 
+let timestamp = require('time-stamp')
 
 
 exports.trans = async (addressNo, addressTo, value) => {
@@ -11,11 +11,15 @@ exports.trans = async (addressNo, addressTo, value) => {
     let address = ethWallet.wallet(addressNo)
     let privateKey = Buffer.from(ethWallet.privKey(addressNo), 'hex')
     //calculating amount in wei
-    let amount = value * 1000000000000000000
-    amount = ~~amount
+    let amount
+    if (value) {
+        amount = value * 1000000000000000000
+        amount = ~~amount
+    }
+
 
     //fees needs changing
-    let gasPrice = 23000000000
+    let gasPrice = 27000000000
     let gasLimit = 21000
 
     let web3 = new Web3('wss://mainnet.infura.io/ws/v3/4fe5d399245448ce9cd6783fc045a4cb')
@@ -24,6 +28,14 @@ exports.trans = async (addressNo, addressTo, value) => {
         web3.eth.net.isListening()
             .then(async () => {
                 let count = await web3.eth.getTransactionCount(address)
+
+                if(!value){
+                    amount = await web3.eth.getBalance(address)
+                    amount = Number(amount)
+                    amount -= gasPrice * gasLimit
+                }
+
+
                 let params = {
                     nonce: count, //nonce need to be added 
                     to: addressTo,
@@ -42,6 +54,7 @@ exports.trans = async (addressNo, addressTo, value) => {
                 console.log("***Request***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
                 console.log(url)
 
+                
                 axios.post(url).then(resp => {
                     console.log("***Response***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
                     console.log(resp)

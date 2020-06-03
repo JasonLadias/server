@@ -11,8 +11,10 @@ exports.trans = async (addressNo, addressTo, value, tokenAddress, decimals) => {
     let address = ethWallet.wallet(addressNo)
     let privateKey = Buffer.from(ethWallet.privKey(addressNo), 'hex')
 
-    let amount = value * Math.pow(10, decimals)
-
+    let amount
+    if (value) {
+        amount = value * Math.pow(10, decimals)
+    }
 
     //fees needs changing
     let gasPrice = 23000000000
@@ -29,6 +31,13 @@ exports.trans = async (addressNo, addressTo, value, tokenAddress, decimals) => {
                 let abiArray = abi
 
                 let contract = new web3.eth.Contract(abiArray, tokenAddress, { from: address })
+
+                if(!value){
+                    amount = await contract.methods.balanceOf(address).call()
+                    amount = Number(amount)
+                    console.log(amount)
+                }
+
 
                 let params = {
                     "from": address,
