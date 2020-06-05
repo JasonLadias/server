@@ -94,3 +94,29 @@ exports.trans = async (addressNo, addressTo, value) => {
     return status
 
 }
+
+exports.addressCheck = async (address) =>{
+    
+    let web3 = new Web3('wss://mainnet.infura.io/ws/v3/4fe5d399245448ce9cd6783fc045a4cb')
+
+    let promise = new Promise((resolve, reject) => {
+        web3.eth.net.isListening()
+            .then(async () => {
+                let checker = await web3.eth.getCode(address)
+                resolve(checker)
+            })
+            .catch(e => {
+                if(e.reason){
+                    resolve(-10)
+                }else{
+                    resolve(-11)
+                }
+            })
+
+
+    })
+
+    let status = await promise
+
+    return status
+}
