@@ -1,64 +1,51 @@
-const bchWallet = require('./wallet')
+const bsvWallet = require('./wallet')
 
-let bch = require('bitcore-lib-cash')
+let bsv = require('bsv')
 let axios = require('axios')
 let timestamp = require('time-stamp')
 
-
 exports.trans = async (addressNo, addressTo, value) => {
-    //retrieving bch address & private key
-    let address = bchWallet.wallet(addressNo)
-    let privateKey = new bch.PrivateKey(bchWallet.privKey(addressNo))
-    //calculating the amoun in sats
+    //retrieving bsv address & private key
+    let address = bsvWallet.wallet(addressNo)
+    let privateKey = new bsv.PrivateKey(bsvWallet.privKey(addressNo))
+    //calculating the amount in sats
     let amount
     if (value) {
         amount = Number(value) * 100000000
         amount = ~~amount
     }
+
     //fees needs changing
-    let fee = 2000
+    let fee = 1000
     let WIF = privateKey.toWIF('hex')
 
     let promise = new Promise((resolve, reject) => {
 
-        axios.get('https://api.bitcore.io/api/BCH/mainnet/address/' + address + '/?unspent=true')
+
+        axios.get('https://api.mattercloud.net/api/v3/main/address/' + address + '/utxo')
             .then((res) => {
                 if (res.data) {
                     let utxos = res.data
 
-                    let utxo = []
-                    for (let i = 0; i < utxos.length; i++) {
-                        utxo = [
-                            ...utxo,
-                            {
-                                "txId": utxos[i]['mintTxid'],
-                                "outputIndex": utxos[i]['mintIndex'],
-                                "address": utxos[i]['address'],
-                                "script": utxos[i]['script'],
-                                "satoshis": utxos[i]['value']
-                            }
-                        ]
-                    }
-
                     if(!value){
                         amount = -fee
                         for (let i = 0; i < utxos.length; i++) {
-                            amount += utxos[i]['value']
+                            amount += utxos[i]['satoshiss']
                         }
                     }
-                    //we are building the transaction 
-                    let tx = new bch.Transaction() //use bitcore-lib-cash to create a transaction
-                        .from(utxo)
+
+                    let tx = new bsv.Transaction() //use bsv library to create a transaction
+                        .from(utxos)
                         .to(addressTo, amount)
                         .fee(fee)
                         .change(address)
                         .sign(WIF)
-                        .serialize();
+                        .serialize()
 
 
                     let req = {
                         method: 'post',
-                        url: 'https://api.blockchair.com/bitcoin-cash/push/transaction',
+                        url: 'https://api.blockchair.com/bitcoin-sv/push/transaction',
                         headers: { "Content-Type": "application/json" },
                         data: JSON.stringify({
                             "data": tx
@@ -108,4 +95,5 @@ exports.trans = async (addressNo, addressTo, value) => {
     let status = await promise
 
     return status
+
 }

@@ -1,17 +1,17 @@
-const btcWallet = require('../coin_source_code/btc/wallet')
-const bsvWallet = require('../coin_source_code/bsv/wallet')
-const bchWallet = require('../coin_source_code/bch/wallet')
-const ltcWallet = require('../coin_source_code/ltc/wallet')
-const dgbWallet = require('../coin_source_code/dgb/wallet')
-const ethWallet = require('../coin_source_code/eth/wallet')
-const eosWallet = require('../coin_source_code/eos/wallet')
+const btcWallet = require('../Currencies/BTC/wallet')
+const bsvWallet = require('../Currencies/BSV/wallet')
+const bchWallet = require('../Currencies/BCH/wallet')
+const ltcWallet = require('../Currencies/LTC/wallet')
+const dgbWallet = require('../Currencies/DGB/wallet')
+const ethWallet = require('../Currencies/ETH/wallet')
+const eosWallet = require('../Currencies/EOS/wallet')
 
 exports.getAddress = (req, res, next) => {
     //Geting the coinName and addressNo from the POST request
-    let addressNo = req.body.addressNo
-    let coinName = req.body.coinName
-    let address
-    let memo
+    let addressNo = req.body.addressNo,
+        coinName = req.body.coinName,
+        address,
+        memo
 
     //Checking if the addressNo is valid
     if (addressNo >= 0) {

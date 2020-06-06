@@ -1,4 +1,4 @@
-const ethTrans = require('../coin_source_code/eth/trans')
+const ethTrans = require('../Currencies/ETH/trans')
 
 exports.checkAddress = async (req,res,next) =>{
     let address = req.body.address

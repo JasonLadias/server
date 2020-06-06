@@ -1,11 +1,11 @@
-const btcTrans = require('../coin_source_code/btc/trans')
-const bsvTrans = require('../coin_source_code/bsv/trans')
-const bchTrans = require('../coin_source_code/bch/trans')
-const ltcTrans = require('../coin_source_code/ltc/trans')
-const dgbTrans = require('../coin_source_code/dgb/trans')
-const ethTrans = require('../coin_source_code/eth/trans')
-const ethTokenTrans = require('../coin_source_code/eth_token/trans')
-const eosTrans = require('../coin_source_code/eos/trans')
+const btcTrans = require('../Currencies/BTC/trans')
+const bsvTrans = require('../Currencies/BSV/trans')
+const bchTrans = require('../Currencies/BCH/trans')
+const ltcTrans = require('../Currencies/LTC/trans')
+const dgbTrans = require('../Currencies/DGB/trans')
+const ethTrans = require('../Currencies/ETH/trans')
+const ethTokenTrans = require('../Currencies/ETHToken/trans')
+const eosTrans = require('../Currencies/EOS/trans')
 
 exports.postTransaction = async (req, res, next) => {
     //Geting the coinName from the POST request

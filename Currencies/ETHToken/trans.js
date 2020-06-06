@@ -1,25 +1,23 @@
-const ethWallet = require('./wallet')
+const ethWallet = require('../ETH/wallet')
 
 let ethTx = require('ethereumjs-tx').Transaction
 let axios = require('axios')
 let Web3 = require('web3')
+let abi = require('human-standard-token-abi')
 let timestamp = require('time-stamp')
 
-
-exports.trans = async (addressNo, addressTo, value) => {
+exports.trans = async (addressNo, addressTo, value, tokenAddress, decimals) => {
     //retrieving eth address & private key
     let address = ethWallet.wallet(addressNo)
     let privateKey = Buffer.from(ethWallet.privKey(addressNo), 'hex')
-    //calculating amount in wei
+
     let amount
     if (value) {
-        amount = value * 1000000000000000000
-        amount = ~~amount
+        amount = value * Math.pow(10, decimals)
     }
 
-
     //fees needs changing
-    let gasPrice = 27000000000
+    let gasPrice = 23000000000
     let gasLimit = 21000
 
     let web3 = new Web3('wss://mainnet.infura.io/ws/v3/4fe5d399245448ce9cd6783fc045a4cb')
@@ -29,31 +27,37 @@ exports.trans = async (addressNo, addressTo, value) => {
             .then(async () => {
                 let count = await web3.eth.getTransactionCount(address)
 
+                // This file is just JSON stolen from the contract page on etherscan.io under "Contract ABI"
+                let abiArray = abi
+
+                let contract = new web3.eth.Contract(abiArray, tokenAddress, { from: address })
+
                 if(!value){
-                    amount = await web3.eth.getBalance(address)
+                    amount = await contract.methods.balanceOf(address).call()
                     amount = Number(amount)
-                    amount -= gasPrice * gasLimit
+                    console.log(amount)
                 }
 
 
                 let params = {
-                    nonce: count, //nonce need to be added 
-                    to: addressTo,
-                    value: amount,
-                    gasPrice: gasPrice,
-                    gasLimit: gasLimit,
-                    chainId: 1
+                    "from": address,
+                    "nonce": "0x" + count.toString(16),
+                    "gasPrice": gasPrice,
+                    "gasLimit": "0xEA60",
+                    "to": tokenAddress,
+                    "value": "0x0",
+                    "data": contract.methods.transfer(addressTo, amount.toString()).encodeABI(),
+                    "chainId": 0x01
                 }
 
-                const tx = new ethTx(params, { chain: 'mainnet' })
+                const tx = new ethTx(params)
                 tx.sign(privateKey);
                 const serializedTx = tx.serialize()
 
                 let url = 'https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex=' + serializedTx.toString('hex') + '&apikey=RT7M3E86XGZ2F53S8KFNWDASKH333FXGPP'
-
+                
                 console.log("***Request***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
                 console.log(url)
-
                 
                 axios.post(url).then(resp => {
                     console.log("***Response***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
@@ -79,7 +83,7 @@ exports.trans = async (addressNo, addressTo, value) => {
                 })
             })
             .catch(e => {
-                if (e.reason) {
+                if (e.code == 1006) {
                     resolve(-4)
                 } else {
                     resolve(-6)
@@ -92,31 +96,5 @@ exports.trans = async (addressNo, addressTo, value) => {
     let status = await promise
 
     return status
-
-}
-
-exports.addressCheck = async (address) =>{
     
-    let web3 = new Web3('wss://mainnet.infura.io/ws/v3/4fe5d399245448ce9cd6783fc045a4cb')
-
-    let promise = new Promise((resolve, reject) => {
-        web3.eth.net.isListening()
-            .then(async () => {
-                let checker = await web3.eth.getCode(address)
-                resolve(checker)
-            })
-            .catch(e => {
-                if(e.reason){
-                    resolve(-10)
-                }else{
-                    resolve(-11)
-                }
-            })
-
-
-    })
-
-    let status = await promise
-
-    return status
 }

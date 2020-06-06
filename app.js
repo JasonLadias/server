@@ -1,4 +1,4 @@
-const http = require('http');
+//const http = require('http');
 
 const express = require('express');
 const bodyParser = require('body-parser')
@@ -6,7 +6,7 @@ const bodyParser = require('body-parser')
 
 const app = express();
 
-const Routes = require('./routes/routes')
+const Routes = require('./Routes/routes')
 
 app.use(bodyParser.urlencoded({extended:true}))
 
