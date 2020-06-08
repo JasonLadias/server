@@ -1,6 +1,6 @@
 const eosWallet = require('./wallet')
 
-let timestamp = require('time-stamp')
+let logger = require('../../Logging/logger')
 const { Api, JsonRpc, RpcError } = require('eosjs')
 const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig')      // development only
 const fetch = require('node-fetch');                                    // node only; not needed in browsers
@@ -8,6 +8,7 @@ const { TextEncoder, TextDecoder } = require('util')
 const rpc = new JsonRpc('http://api.eosn.io', { fetch })
 
 exports.trans = async (addressTo, value, memo) => {
+    let path = "EOS/Trans"
     //get the privateKey
     let privateKey = eosWallet.privKey()
 
@@ -39,23 +40,19 @@ exports.trans = async (addressTo, value, memo) => {
                 blocksBehind: 3,
                 expireSeconds: 30,
             }).then(result => {
-                console.log("***Response***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
-                console.log(result)
+                logger.log(path, JSON.stringify(""), JSON.stringify(result))
                 if(result.transaction_id){
-                    console.log("Transaction OK")
                     resolve(result.transaction_id)
                 }else{
-                    console.error("8 - Broadcast server unexpected response")
                     resolve(-8)
                 }
                 
             }).catch(error => {
-                console.error("***Response***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
-                console.error(error)
                 if(error.isFetchError){
-                    console.error("7 - Broadcast Server Down")
+                    logger.log(path, JSON.stringify(""), JSON.stringify(undefined))
                     resolve(-7)
                 }else{
+                    logger.log(path, JSON.stringify(""), err)
                     resolve(-6)
                 }
                 

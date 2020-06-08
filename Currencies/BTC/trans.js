@@ -3,10 +3,11 @@ const btcWallet = require('./wallet')
 let wif = require('wif')
 let axios = require('axios')
 let bitcore = require('bitcore-lib')
-let timestamp = require('time-stamp')
+let logger = require('../../Logging/logger')
 
 //will send the BTC transaction having as input the number, receiving address & amount
 exports.trans = async (addressNo, addressTo, value) => {
+    let path = "BTC/Trans"
     //retrieving BTC address & privateKey for the specific number
     let address = btcWallet.wallet(addressNo)
     let privateKey = Buffer.from(btcWallet.privKey(addressNo), 'hex')
@@ -61,29 +62,21 @@ exports.trans = async (addressNo, addressTo, value) => {
                         })
                     }
                 
-                    console.log("***Request***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
-                    console.log(req)
-
                     axios(req)
                         .then((res) => {
-                            console.log("***Response***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
-                            console.log(res)
+                            logger.log(path, JSON.stringify(req), JSON.stringify(res.data))
                             if (res.data.data.transaction_hash) {
-                                console.log("Transaction OK")
                                 resolve(res.data.data.transaction_hash)
                             } else {
-                                console.error("8 - Broadcast server unexpected response")
                                 resolve(-8)
                             }
                         })
                         .catch((err) => {
-                            console.error("***Response***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
-                            console.error(err)
                             if (err.isAxiosError) {
-                                console.error("7 - Broadcast Server Down")
+                                logger.log(path, JSON.stringify(req), JSON.stringify(err.response))
                                 resolve(-7)
                             } else {
-                                console.error("9 - Broadcast server unreadable response")
+                                logger.log(path, JSON.stringify(req), err)
                                 resolve(-9)
                             }
                         })

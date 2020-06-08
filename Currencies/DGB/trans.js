@@ -2,9 +2,10 @@ const dgbWallet = require('./wallet')
 
 let dgb = require('digibyte')
 let axios = require('axios')
-let timestamp = require('time-stamp')
+let logger = require('../../Logging/logger')
 
 exports.trans = async (addressNo, addressTo, value) => {
+    let path = "DGB/Trans"
     //retrieving bch address & private key
     let address = dgbWallet.wallet(addressNo)
     let privateKey = new dgb.PrivateKey(dgbWallet.privKey(addressNo))
@@ -54,29 +55,21 @@ exports.trans = async (addressNo, addressTo, value) => {
                         })
                     }
 
-                    console.log("***Request***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
-                    console.log(req)
-
                     axios(req)
                         .then((res) => {
-                            console.log("***Response***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
-                            console.log(res)
+                            logger.log(path, JSON.stringify(req), JSON.stringify(res.data))
                             if (res.data.data.transaction_hash) {
-                                console.log("Transaction OK")
                                 resolve(res.data.data.transaction_hash)
                             } else {
-                                console.error("8 - Broadcast server unexpected response")
                                 resolve(-8)
                             }
                         })
                         .catch((err) => {
-                            console.error("***Response***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
-                            console.error(err)
                             if (err.isAxiosError) {
-                                console.error("7 - Broadcast Server Down")
+                                logger.log(path, JSON.stringify(req), JSON.stringify(err.response))
                                 resolve(-7)
                             } else {
-                                console.error("9 - Broadcast server unreadable response")
+                                logger.log(path, JSON.stringify(req), err)
                                 resolve(-9)
                             }
                         })

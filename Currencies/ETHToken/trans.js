@@ -4,9 +4,10 @@ let ethTx = require('ethereumjs-tx').Transaction
 let axios = require('axios')
 let Web3 = require('web3')
 let abi = require('human-standard-token-abi')
-let timestamp = require('time-stamp')
+let logger = require('../../Logging/logger')
 
 exports.trans = async (addressNo, addressTo, value, tokenAddress, decimals) => {
+    let path = "OMG/Trans", request
     //retrieving eth address & private key
     let address = ethWallet.wallet(addressNo)
     let privateKey = Buffer.from(ethWallet.privKey(addressNo), 'hex')
@@ -32,7 +33,7 @@ exports.trans = async (addressNo, addressTo, value, tokenAddress, decimals) => {
 
                 let contract = new web3.eth.Contract(abiArray, tokenAddress, { from: address })
 
-                if(!value){
+                if (!value) {
                     amount = await contract.methods.balanceOf(address).call()
                     amount = Number(amount)
                     console.log(amount)
@@ -55,29 +56,23 @@ exports.trans = async (addressNo, addressTo, value, tokenAddress, decimals) => {
                 const serializedTx = tx.serialize()
 
                 let url = 'https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex=' + serializedTx.toString('hex') + '&apikey=RT7M3E86XGZ2F53S8KFNWDASKH333FXGPP'
-                
-                console.log("***Request***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
-                console.log(url)
-                
+
+                request = "\nPOST " + url
+
                 axios.post(url).then(resp => {
-                    console.log("***Response***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
-                    console.log(resp)
-                    if (resp.data.error) {
-                        console.error("8 - Broadcast server unexpected response")
+                    logger.log(path, request, JSON.stringify(resp.data))
+                    if (resp.dataa.error) {
                         resolve(-8)
                     }
                     else {
-                        console.log("Transaction OK")
                         resolve(resp.data.result)
                     }
                 }).catch(err => {
-                    console.error("***Response***\n" + timestamp('YYYY/MM/DD - HH:mm:ss'))
-                    console.error(err)
                     if (err.isAxiosError) {
-                        console.error("7 - Broadcast Server Down")
+                        logger.log(path, request, JSON.stringify(err.response))
                         resolve(-7)
                     } else {
-                        console.error("9 - Broadcast server unreadable response")
+                        logger.log(path, request, err)
                         resolve(-9)
                     }
                 })
@@ -96,5 +91,5 @@ exports.trans = async (addressNo, addressTo, value, tokenAddress, decimals) => {
     let status = await promise
 
     return status
-    
+
 }
