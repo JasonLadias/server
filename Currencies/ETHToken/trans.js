@@ -6,8 +6,8 @@ let Web3 = require('web3')
 let abi = require('human-standard-token-abi')
 let logger = require('../../Logging/logger')
 
-exports.trans = async (addressNo, addressTo, value, tokenAddress, decimals) => {
-    let path = "OMG/Trans", request
+exports.trans = async (addressNo, addressTo, value, tokenAddress, decimals, ticker) => {
+    let path = ticker+"/Trans", request
     //retrieving eth address & private key
     let address = ethWallet.wallet(addressNo)
     let privateKey = Buffer.from(ethWallet.privKey(addressNo), 'hex')
@@ -61,7 +61,7 @@ exports.trans = async (addressNo, addressTo, value, tokenAddress, decimals) => {
 
                 axios.post(url).then(resp => {
                     logger.log(path, request, JSON.stringify(resp.data))
-                    if (resp.dataa.error) {
+                    if (resp.data.error) {
                         resolve(-8)
                     }
                     else {

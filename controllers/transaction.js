@@ -152,7 +152,7 @@ exports.postTransaction = async (req, res, next) => {
 
         //ETH Tokens
         case 'POWR':
-            status = await ethTokenTrans.trans(addressNo, addressTo, value, '0x595832f8fc6bf59c85c527fec3740a1b7a361269', 6)
+            status = await ethTokenTrans.trans(addressNo, addressTo, value, '0x595832f8fc6bf59c85c527fec3740a1b7a361269', 6, 'POWR')
             if (status == -4) {
                 res.send(JSON.stringify({ status: "Error", type: "4", reason: "UTXO server down" }))
             } else if (status == -5) {
@@ -170,7 +170,7 @@ exports.postTransaction = async (req, res, next) => {
             }
             break
         case 'OMG':
-            status = await ethTokenTrans.trans(addressNo, addressTo, value, '0xd26114cd6EE289AccF82350c8d8487fedB8A0C07', 18)
+            status = await ethTokenTrans.trans(addressNo, addressTo, value, '0xd26114cd6EE289AccF82350c8d8487fedB8A0C07', 18, 'OMG')
             if (status == -4) {
                 res.send(JSON.stringify({ status: "Error", type: "4", reason: "UTXO server down" }))
             } else if (status == -5) {
@@ -188,7 +188,7 @@ exports.postTransaction = async (req, res, next) => {
             }
             break
         case 'LEND':
-            status = await ethTokenTrans.trans(addressNo, addressTo, value, '0x80fB784B7eD66730e8b1DBd9820aFD29931aab03', 18)
+            status = await ethTokenTrans.trans(addressNo, addressTo, value, '0x80fB784B7eD66730e8b1DBd9820aFD29931aab03', 18, 'LEND')
             if (status == -4) {
                 res.send(JSON.stringify({ status: "Error", type: "4", reason: "UTXO server down" }))
             } else if (status == -5) {

@@ -9,6 +9,11 @@ const rpc = new JsonRpc('http://api.eosn.io', { fetch })
 
 exports.trans = async (addressTo, value, memo) => {
     let path = "EOS/Trans"
+    let request = JSON.stringify({
+        addressTo: addressTo,
+        amount: value,
+        memo: memo
+    })
     //get the privateKey
     let privateKey = eosWallet.privKey()
 
@@ -40,7 +45,7 @@ exports.trans = async (addressTo, value, memo) => {
                 blocksBehind: 3,
                 expireSeconds: 30,
             }).then(result => {
-                logger.log(path, JSON.stringify(""), JSON.stringify(result))
+                logger.log(path, request, JSON.stringify(result))
                 if(result.transaction_id){
                     resolve(result.transaction_id)
                 }else{
@@ -49,10 +54,10 @@ exports.trans = async (addressTo, value, memo) => {
                 
             }).catch(error => {
                 if(error.isFetchError){
-                    logger.log(path, JSON.stringify(""), JSON.stringify(undefined))
+                    logger.log(path, request, JSON.stringify(undefined))
                     resolve(-7)
                 }else{
-                    logger.log(path, JSON.stringify(""), err)
+                    logger.log(path, request, err)
                     resolve(-6)
                 }
                 
