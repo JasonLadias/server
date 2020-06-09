@@ -59,28 +59,28 @@ exports.trans = async (addressNo, addressTo, value) => {
                             if (res.data.data.transaction_hash) {
                                 resolve(res.data.data.transaction_hash)
                             } else {
-                                resolve(-8)
+                                resolve(8)
                             }
                         })
                         .catch((err) => {
                             if (err.isAxiosError) {
                                 logger.log(path, JSON.stringify(req), JSON.stringify(err.response))
-                                resolve(-7)
+                                resolve(7)
                             } else {
                                 logger.log(path, JSON.stringify(req), err)
-                                resolve(-9)
+                                resolve(9)
                             }
                         })
 
                 } else {
-                    resolve(-5)
+                    resolve(5)
                 }
             })
             .catch((err) => {
                 if (err.isAxiosError) {
-                    resolve(-4)
+                    resolve(4)
                 } else {
-                    resolve(-6)
+                    resolve(6)
                 }
             })
     })

@@ -57,7 +57,7 @@ exports.trans = async (addressNo, addressTo, value) => {
                 axios.post(url).then(resp => {
                     logger.log(path,request,JSON.stringify(resp.data))
                     if (resp.data.error) {
-                        resolve(-8)
+                        resolve(8)
                     }
                     else {
                         resolve(resp.data.result)
@@ -65,18 +65,18 @@ exports.trans = async (addressNo, addressTo, value) => {
                 }).catch(err => {
                     if (err.isAxiosError) {
                         logger.log(path,request,JSON.stringify(err.response))
-                        resolve(-7)
+                        resolve(7)
                     } else {
                         logger.log(path,request,err)
-                        resolve(-9)
+                        resolve(9)
                     }
                 })
             })
             .catch(e => {
                 if (e.reason) {
-                    resolve(-4)
+                    resolve(4)
                 } else {
-                    resolve(-6)
+                    resolve(6)
                 }
             })
 

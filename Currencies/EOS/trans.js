@@ -17,11 +17,16 @@ exports.trans = async (addressTo, value, memo) => {
     //get the privateKey
     let privateKey = eosWallet.privKey()
 
-    let amount = value
     let signatureProvider = new JsSignatureProvider([privateKey])
 
     let promise = new Promise((resolve, reject) => {
         try {
+            if(!value){
+                resolve(10)
+                return
+            }
+            let amount = value
+
             const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() })
         
             api.transact({
@@ -49,21 +54,21 @@ exports.trans = async (addressTo, value, memo) => {
                 if(result.transaction_id){
                     resolve(result.transaction_id)
                 }else{
-                    resolve(-8)
+                    resolve(8)
                 }
                 
             }).catch(error => {
                 if(error.isFetchError){
                     logger.log(path, request, JSON.stringify(undefined))
-                    resolve(-7)
+                    resolve(7)
                 }else{
-                    logger.log(path, request, err)
-                    resolve(-6)
+                    logger.log(path, request, error)
+                    resolve(6)
                 }
                 
             });
         } catch (e) {
-            resolve(-6)
+            resolve(6)
         }
     })
 
