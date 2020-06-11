@@ -58,6 +58,7 @@ exports.trans = async (addressTo, value, memo) => {
                 }
                 
             }).catch(error => {
+                console.log(error)
                 if(error.isFetchError){
                     logger.log(path, request, JSON.stringify(undefined))
                     resolve(7)
