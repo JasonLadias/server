@@ -5,8 +5,9 @@ let axios = require('axios')
 let logger = require('../../Logging/logger')
 
 exports.trans = async (addressNo, addressTo, value) => {
-    let error = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    let path = "DGB/Trans"
+    let UTXOError = [4, 5, 6]
+    let BroadcastError = [7, 8, 9, 10]
+    let UTXOErrorFinal = [4, 5, 6, 11]
     //retrieving bch address & private key
     let address = dgbWallet.wallet(addressNo)
     let privateKey = new dgb.PrivateKey(dgbWallet.privKey(addressNo))
@@ -21,21 +22,40 @@ exports.trans = async (addressNo, addressTo, value) => {
     let fee = 10000
     let WIF = privateKey.toWIF('hex')
 
-    let i = 0, status
+    let i = 0, tx, status
     while (i < 6) {
         if (i % 2 == 0) {
-            status = await server1(address, addressTo, amount, fee, WIF, path, value)
+            tx = await UTXO1(address, addressTo, amount, fee, WIF, value)
         } else {
-            status = await server2(address, addressTo, amount, fee, WIF, path, value)
+            tx = await UTXO2(address, addressTo, amount, fee, WIF, value)
         }
-        if (!error.includes(status)) break
+        console.log(`i:${i}, status:${tx}`)
+        if (!UTXOError.includes(tx)) break
+        i++
+    }
+
+    if (UTXOErrorFinal.includes(tx)) return tx
+
+    i = 0
+
+    while (i < 6) {
+        if (i % 2 == 0) {
+            status = await server1(tx)
+        } else {
+            status = await server2(tx)
+        }
+        console.log(`i:${i}, status:${status}`)
+        if (!BroadcastError.includes(status)) break
         i++
     }
 
     return status
+
 }
 
-const server1 = async (address, addressTo, amount, fee, WIF, path, value) => {
+const UTXO1 = async (address, addressTo, amount, fee, WIF, value) => {
+
+    let path = "DGB/Utxo"
 
     let promise = new Promise((resolve, reject) => {
 
@@ -69,33 +89,7 @@ const server1 = async (address, addressTo, amount, fee, WIF, path, value) => {
                         .sign(WIF)
                         .serialize();
 
-                    let req = {
-                        method: 'post',
-                        url: 'https://digiexplorer.info/api/tx/send',
-                        headers: { "Content-Type": "application/json" },
-                        data: JSON.stringify({
-                            "rawtx": tx
-                        })
-                    }
-
-                    axios(req)
-                        .then((res) => {
-                            logger.log(path, JSON.stringify(req), JSON.stringify(res.data))
-                            if (res.data.data.transaction_hash) {
-                                resolve(res.data.data.transaction_hash)
-                            } else {
-                                resolve(8)
-                            }
-                        })
-                        .catch((err) => {
-                            if (err.isAxiosError) {
-                                logger.log(path, JSON.stringify(req), JSON.stringify(err.response))
-                                resolve(7)
-                            } else {
-                                logger.log(path, JSON.stringify(req), err)
-                                resolve(9)
-                            }
-                        })
+                    resolve(tx.toString('hex'))
 
                 } else {
                     resolve(5)
@@ -109,16 +103,18 @@ const server1 = async (address, addressTo, amount, fee, WIF, path, value) => {
                 }
             })
 
-
-
     })
 
     return promise
+
 }
 
-const server2 = async (address, addressTo, amount, fee, WIF, path, value) => {
+const UTXO2 = async (address, addressTo, amount, fee, WIF, value) => {
+
+    let path = "DGB/Utxo"
 
     let promise = new Promise((resolve, reject) => {
+
 
         axios.get('https://digiexplorer.info/api/addr/' + address + '/utxo')
             .then((res) => {
@@ -126,7 +122,7 @@ const server2 = async (address, addressTo, amount, fee, WIF, path, value) => {
                 console.log(res.data)
                 if (res.data) {
 
-                    let utxos = res.data , sum = 0
+                    let utxos = res.data, sum = 0
 
                     for (let i = 0; i < utxos.length; i++) {
                         sum += utxos[i]['amount']
@@ -134,7 +130,7 @@ const server2 = async (address, addressTo, amount, fee, WIF, path, value) => {
 
                     if (!value) {
                         amount = -fee + sum
-                    }else{
+                    } else {
                         if (amount > sum) {
                             resolve(11)
                             return
@@ -149,33 +145,7 @@ const server2 = async (address, addressTo, amount, fee, WIF, path, value) => {
                         .sign(WIF)
                         .serialize();
 
-                    let req = {
-                        method: 'post',
-                        url: 'https://digiexplorer.info/api/tx/send',
-                        headers: { "Content-Type": "application/json" },
-                        data: JSON.stringify({
-                            "rawtx": tx
-                        })
-                    }
-
-                    axios(req)
-                        .then((res) => {
-                            logger.log(path, JSON.stringify(req), JSON.stringify(res.data))
-                            if (res.data.data.transaction_hash) {
-                                resolve(res.data.data.transaction_hash)
-                            } else {
-                                resolve(8)
-                            }
-                        })
-                        .catch((err) => {
-                            if (err.isAxiosError) {
-                                logger.log(path, JSON.stringify(req), JSON.stringify(err.response))
-                                resolve(7)
-                            } else {
-                                logger.log(path, JSON.stringify(req), err)
-                                resolve(9)
-                            }
-                        })
+                    resolve(tx.toString('hex'))
 
                 } else {
                     resolve(5)
@@ -189,7 +159,84 @@ const server2 = async (address, addressTo, amount, fee, WIF, path, value) => {
                 }
             })
 
+    })
 
+    return promise
+
+}
+
+const server1 = async (tx) => {
+
+    let path = "DGB/Trans"
+
+    let promise = new Promise((resolve, reject) => {
+
+        let req = {
+            method: 'post',
+            url: 'https://digiexplorer.info/api/tx/send',
+            headers: { "Content-Type": "application/json" },
+            data: JSON.stringify({
+                "rawtx": tx
+            })
+        }
+
+        axios(req)
+            .then((res) => {
+                logger.log(path, JSON.stringify(req), JSON.stringify(res.data))
+                if (res.data.data.transaction_hash) {
+                    resolve(res.data.data.transaction_hash)
+                } else {
+                    resolve(8)
+                }
+            })
+            .catch((err) => {
+                if (err.isAxiosError) {
+                    logger.log(path, JSON.stringify(req), JSON.stringify(err.response))
+                    resolve(7)
+                } else {
+                    logger.log(path, JSON.stringify(req), err)
+                    resolve(9)
+                }
+            })
+
+    })
+
+    return promise
+}
+
+const server2 = async (tx) => {
+
+    let path = "DGB/Trans"
+
+    let promise = new Promise((resolve, reject) => {
+
+        let req = {
+            method: 'post',
+            url: 'https://digiexplorer.info/api/tx/send',
+            headers: { "Content-Type": "application/json" },
+            data: JSON.stringify({
+                "rawtx": tx
+            })
+        }
+
+        axios(req)
+            .then((res) => {
+                logger.log(path, JSON.stringify(req), JSON.stringify(res.data))
+                if (res.data.data.transaction_hash) {
+                    resolve(res.data.data.transaction_hash)
+                } else {
+                    resolve(8)
+                }
+            })
+            .catch((err) => {
+                if (err.isAxiosError) {
+                    logger.log(path, JSON.stringify(req), JSON.stringify(err.response))
+                    resolve(7)
+                } else {
+                    logger.log(path, JSON.stringify(req), err)
+                    resolve(9)
+                }
+            })
 
     })
 

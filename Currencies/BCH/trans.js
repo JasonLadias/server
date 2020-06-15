@@ -5,8 +5,9 @@ let axios = require('axios')
 let logger = require('../../Logging/logger')
 
 exports.trans = async (addressNo, addressTo, value) => {
-    let error = [1,2,3,4,5,6,7,8,9,10,11]
-    let path = "BCH/Trans"
+    let UTXOError = [4,5,6]
+    let BroadcastError = [7,8,9,10]
+    let UTXOErrorFinal = [4,5,6,11]
     //retrieving bch address & private key
     let address = bchWallet.wallet(addressNo)
     let privateKey = new bch.PrivateKey(bchWallet.privKey(addressNo))
@@ -20,14 +21,30 @@ exports.trans = async (addressNo, addressTo, value) => {
     let fee = 2000
     let WIF = privateKey.toWIF('hex')
 
-    let i = 0, status
-    while(i<6 ){
-        if(i%2 == 0){
-            status = await server1(address, addressTo, amount, fee, WIF, path, value)
-        }else{
-            status = await server2(address, addressTo, amount, fee, WIF, path, value)
+    let i = 0, tx, status
+    while (i < 6) {
+        if (i % 2 == 0) {
+            tx = await UTXO1(address, addressTo, amount, fee, WIF, value)
+        } else {
+            tx = await UTXO2(address, addressTo, amount, fee, WIF, value)
         }
-        if(!error.includes(status)) break
+        console.log(`i:${i}, status:${tx}`)
+        if (!UTXOError.includes(tx)) break
+        i++
+    }
+
+    if(UTXOErrorFinal.includes(tx)) return tx
+
+    i = 0
+
+    while (i < 6) {
+        if (i % 2 == 0) {
+            status = await server1(tx)
+        } else {
+            status = await server2(tx)
+        }
+        console.log(`i:${i}, status:${status}`)
+        if (!BroadcastError.includes(status)) break       
         i++
     }
 
@@ -35,7 +52,10 @@ exports.trans = async (addressNo, addressTo, value) => {
 
 }
 
-const server1 = async (address, addressTo, amount, fee, WIF, path, value) => {
+
+const UTXO1 = async (address, addressTo, amount, fee, WIF, value) => {
+
+    let path = "BCH/Utxo"
 
     let promise = new Promise((resolve, reject) => {
 
@@ -59,12 +79,10 @@ const server1 = async (address, addressTo, amount, fee, WIF, path, value) => {
                         sum += utxos[i]['value']
                     }
 
-                    console.log(`amount = ${amount}, value = ${value}, sum = ${sum}`)
-
-                    if(!value){
+                    if (!value) {
                         amount = -fee + sum
-                    }else{
-                        if(amount > sum){
+                    } else {
+                        if (amount > sum) {
                             resolve(11)
                             return
                         }
@@ -79,34 +97,7 @@ const server1 = async (address, addressTo, amount, fee, WIF, path, value) => {
                         .sign(WIF)
                         .serialize();
 
-
-                    let req = {
-                        method: 'post',
-                        url: 'https://api.blockchair.com/bitcoin-cash/push/transaction',
-                        headers: { "Content-Type": "application/json" },
-                        data: JSON.stringify({
-                            "data": tx
-                        })
-                    }
-
-                    axios(req)
-                        .then((res) => {
-                            logger.log(path, JSON.stringify(req), JSON.stringify(res.data))
-                            if (res.data.data.transaction_hash) {
-                                resolve(res.data.data.transaction_hash)
-                            } else {
-                                resolve(8)
-                            }
-                        })
-                        .catch((err) => {
-                            if (err.isAxiosError) {
-                                logger.log(path, JSON.stringify(req), JSON.stringify(err.response))
-                                resolve(7)
-                            } else {
-                                logger.log(path, JSON.stringify(req), err)
-                                resolve(9)
-                            }
-                        })
+                    resolve(tx)
 
                 } else {
                     resolve(5)
@@ -124,7 +115,9 @@ const server1 = async (address, addressTo, amount, fee, WIF, path, value) => {
     return promise
 }
 
-const server2 = async (address, addressTo, amount, fee, WIF, path, value) => {
+const UTXO2 = async (address, addressTo, amount, fee, WIF, value) => {
+
+    let path = "BCH/Utxo"
 
     let promise = new Promise((resolve, reject) => {
 
@@ -148,10 +141,10 @@ const server2 = async (address, addressTo, amount, fee, WIF, path, value) => {
                         sum += utxos[i]['value']
                     }
 
-                    if(!value){
+                    if (!value) {
                         amount = -fee + sum
-                    }else{
-                        if(amount > sum){
+                    } else {
+                        if (amount > sum) {
                             resolve(11)
                             return
                         }
@@ -166,34 +159,7 @@ const server2 = async (address, addressTo, amount, fee, WIF, path, value) => {
                         .sign(WIF)
                         .serialize();
 
-
-                    let req = {
-                        method: 'post',
-                        url: 'https://api.blockchair.com/bitcoin-cash/push/transaction',
-                        headers: { "Content-Type": "application/json" },
-                        data: JSON.stringify({
-                            "data": tx
-                        })
-                    }
-
-                    axios(req)
-                        .then((res) => {
-                            logger.log(path, JSON.stringify(req), JSON.stringify(res.data))
-                            if (res.data.data.transaction_hash) {
-                                resolve(res.data.data.transaction_hash)
-                            } else {
-                                resolve(8)
-                            }
-                        })
-                        .catch((err) => {
-                            if (err.isAxiosError) {
-                                logger.log(path, JSON.stringify(req), JSON.stringify(err.response))
-                                resolve(7)
-                            } else {
-                                logger.log(path, JSON.stringify(req), err)
-                                resolve(9)
-                            }
-                        })
+                    resolve(tx)
 
                 } else {
                     resolve(5)
@@ -206,6 +172,87 @@ const server2 = async (address, addressTo, amount, fee, WIF, path, value) => {
                     resolve(6)
                 }
             })
+    })
+
+    return promise
+}
+
+const server1 = async (tx) => {
+
+    let path = "BCH/Trans"
+
+    let promise = new Promise((resolve, reject) => {
+
+        let req = {
+            method: 'post',
+            url: 'https://api.blockchair.com/bitcoin-cash/push/transaction',
+            headers: { "Content-Type": "application/json" },
+            data: JSON.stringify({
+                "data": tx
+            })
+        }
+
+        axios(req)
+            .then((res) => {
+                logger.log(path, JSON.stringify(req), JSON.stringify(res.data))
+                if (res.data.data.transaction_hash) {
+                    resolve(res.data.data.transaction_hash)
+                } else {
+                    resolve(8)
+                }
+            })
+            .catch((err) => {
+                if (err.isAxiosError) {
+                    logger.log(path, JSON.stringify(req), JSON.stringify(err.data))
+                    resolve(7)
+                } else {
+                    logger.log(path, JSON.stringify(req), err)
+                    resolve(9)
+                }
+            })
+
+
+    })
+
+    return promise
+}
+
+const server2 = async (tx) => {
+
+    let path = "BCH/Trans"
+
+    let promise = new Promise((resolve, reject) => {
+
+
+        let req = {
+            method: 'post',
+            url: 'https://api.blockchair.com/bitcoin-cash/push/transaction',
+            headers: { "Content-Type": "application/json" },
+            data: JSON.stringify({
+                "data": tx
+            })
+        }
+
+        axios(req)
+            .then((res) => {
+                logger.log(path, JSON.stringify(req), JSON.stringify(res.data))
+                if (res.data.data.transaction_hash) {
+                    resolve(res.data.data.transaction_hash)
+                } else {
+                    resolve(8)
+                }
+            })
+            .catch((err) => {
+                if (err.isAxiosError) {
+                    logger.log(path, JSON.stringify(req), JSON.stringify(err.data))
+                    resolve(7)
+                } else {
+                    logger.log(path, JSON.stringify(req), err)
+                    resolve(9)
+                }
+            })
+
+
     })
 
     return promise
