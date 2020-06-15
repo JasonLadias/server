@@ -15,11 +15,8 @@ exports.trans = async (addressNo, addressTo, value) => {
     //calculating amount in wei
     let amount
     if (value) {
-        amount = value * 1000000000000000000
-        amount = ~~amount
+        amount = value * Math.pow(10, 18)
     }
-
-    
 
     let i = 0, status
     while (i < 6) {
@@ -30,7 +27,6 @@ exports.trans = async (addressNo, addressTo, value) => {
         }
         if (!error.includes(status)) break
         i++
-        console.log(i + " " +status)
     }
 
     return status
@@ -79,6 +75,12 @@ const server1 = async (address, addressTo, amount, privateKey, path, value, requ
                     amount = await web3.eth.getBalance(address)
                     amount = Number(amount)
                     amount -= gasPrice * gasLimit
+                }else{
+                    let sum = await web3.eth.getBalance(address)
+                    if(amount > sum){
+                        resolve(11)
+                        return
+                    }
                 }
 
                 let params = {
@@ -146,6 +148,12 @@ const server2 = async (address, addressTo, amount, privateKey , path, value, req
                     amount = await web3.eth.getBalance(address)
                     amount = Number(amount)
                     amount -= gasPrice * gasLimit
+                }else{
+                    let sum = await web3.eth.getBalance(address)
+                    if(amount > sum){
+                        resolve(11)
+                        return
+                    }
                 }
 
                 let params = {

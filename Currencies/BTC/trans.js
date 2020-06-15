@@ -52,13 +52,18 @@ const server1 = async (address, addressTo, amount, fee, WIF, path, value) => {
         })
             .then((res) => {
                 if (res.data) {
-                    let utxos = res.data
+                    let utxos = res.data, sum = 0
 
+                    for (let i = 0; i < utxos.length; i++) {
+                        sum += utxos[i]['satoshis']
+                    }
 
                     if (!value) {
-                        amount = -fee
-                        for (let i = 0; i < utxos.length; i++) {
-                            amount += utxos[i]['satoshis']
+                        amount = -fee + sum
+                    }else{
+                        if(amount > sum){
+                            resolve(11)
+                            return
                         }
                     }
 
@@ -125,7 +130,7 @@ const server2 = async (address, addressTo, amount, fee, WIF, path, value) => {
                 if (res.data.unspent_outputs) {
                     let utxos = res.data.unspent_outputs
                     
-                    let utxo = []
+                    let utxo = [], sum = 0
                     for (let i = 0; i < utxos.length; i++) {
                         utxo = [
                             ...utxo,
@@ -136,12 +141,17 @@ const server2 = async (address, addressTo, amount, fee, WIF, path, value) => {
                                 "satoshis": utxos[i]['value']
                             }
                         ]
+                        sum += utxos[i]['value']
                     }
+
+
                     
                     if (!value) {
-                        amount = -fee
-                        for (let i = 0; i < utxos.length; i++) {
-                            amount += utxos[i]['satoshis']
+                        amount = -fee + sum
+                    }else{
+                        if(amount > sum){
+                            resolve(11)
+                            return
                         }
                     }
 

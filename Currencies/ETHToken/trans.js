@@ -22,13 +22,12 @@ exports.trans = async (addressNo, addressTo, value, tokenAddress, decimals, tick
     let i = 0, status
     while (i < 6) {
         if (i % 2 == 0) {
-            status = await server1(address, addressTo, amount, privateKey, path, value, request)
+            status = await server1(address, addressTo, amount, privateKey, path, value, request, tokenAddress)
         } else {
-            status = await server2(address, addressTo, amount, privateKey, path, value, request)
+            status = await server2(address, addressTo, amount, privateKey, path, value, request, tokenAddress)
         }
         if (!error.includes(status)) break
         i++
-        console.log(i + " " +status)
     }
 
     return status
@@ -56,6 +55,13 @@ const server1 = async (address, addressTo, amount, privateKey , path, value, req
                     amount = await contract.methods.balanceOf(address).call()
                     amount = Number(amount)
                     console.log(amount)
+                }else{
+                    let sum = await contract.methods.balanceOf(address).call()
+                    console.log(sum + " "+ amount)
+                    if(amount > sum){
+                        resolve(11)
+                        return
+                    }
                 }
 
 
@@ -131,6 +137,12 @@ const server2 = async (address, addressTo, amount, privateKey , path, value, req
                     amount = await contract.methods.balanceOf(address).call()
                     amount = Number(amount)
                     console.log(amount)
+                }else{
+                    let sum = await contract.methods.balanceOf(address).call()
+                    if(amount > sum){
+                        resolve(11)
+                        return
+                    }
                 }
 
 

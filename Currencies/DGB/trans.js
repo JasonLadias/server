@@ -46,12 +46,18 @@ const server1 = async (address, addressTo, amount, fee, WIF, path, value) => {
                 console.log(res.data)
                 if (res.data) {
 
-                    let utxos = res.data
+                    let utxos = res.data, sum = 0
+
+                    for (let i = 0; i < utxos.length; i++) {
+                        sum += utxos[i]['amount']
+                    }
 
                     if (!value) {
-                        amount = -fee
-                        for (let i = 0; i < utxos.length; i++) {
-                            amount += utxos[i]['amount']
+                        amount = -fee + sum
+                    } else {
+                        if (amount > sum) {
+                            resolve(11)
+                            return
                         }
                     }
 
@@ -120,12 +126,18 @@ const server2 = async (address, addressTo, amount, fee, WIF, path, value) => {
                 console.log(res.data)
                 if (res.data) {
 
-                    let utxos = res.data
+                    let utxos = res.data , sum = 0
+
+                    for (let i = 0; i < utxos.length; i++) {
+                        sum += utxos[i]['amount']
+                    }
 
                     if (!value) {
-                        amount = -fee
-                        for (let i = 0; i < utxos.length; i++) {
-                            amount += utxos[i]['amount']
+                        amount = -fee + sum
+                    }else{
+                        if (amount > sum) {
+                            resolve(11)
+                            return
                         }
                     }
 

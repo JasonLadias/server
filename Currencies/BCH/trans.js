@@ -5,7 +5,7 @@ let axios = require('axios')
 let logger = require('../../Logging/logger')
 
 exports.trans = async (addressNo, addressTo, value) => {
-    let error = [1,2,3,4,5,6,7,8,9,10]
+    let error = [1,2,3,4,5,6,7,8,9,10,11]
     let path = "BCH/Trans"
     //retrieving bch address & private key
     let address = bchWallet.wallet(addressNo)
@@ -44,7 +44,7 @@ const server1 = async (address, addressTo, amount, fee, WIF, path, value) => {
                 if (res.data) {
                     let utxos = res.data
 
-                    let utxo = []
+                    let utxo = [], sum = 0
                     for (let i = 0; i < utxos.length; i++) {
                         utxo = [
                             ...utxo,
@@ -56,14 +56,20 @@ const server1 = async (address, addressTo, amount, fee, WIF, path, value) => {
                                 "satoshis": utxos[i]['value']
                             }
                         ]
+                        sum += utxos[i]['value']
                     }
 
+                    console.log(`amount = ${amount}, value = ${value}, sum = ${sum}`)
+
                     if(!value){
-                        amount = -fee
-                        for (let i = 0; i < utxos.length; i++) {
-                            amount += utxos[i]['value']
+                        amount = -fee + sum
+                    }else{
+                        if(amount > sum){
+                            resolve(11)
+                            return
                         }
                     }
+
                     //we are building the transaction 
                     let tx = new bch.Transaction() //use bitcore-lib-cash to create a transaction
                         .from(utxo)
@@ -127,7 +133,7 @@ const server2 = async (address, addressTo, amount, fee, WIF, path, value) => {
                 if (res.data) {
                     let utxos = res.data
 
-                    let utxo = []
+                    let utxo = [], sum = 0
                     for (let i = 0; i < utxos.length; i++) {
                         utxo = [
                             ...utxo,
@@ -139,14 +145,18 @@ const server2 = async (address, addressTo, amount, fee, WIF, path, value) => {
                                 "satoshis": utxos[i]['value']
                             }
                         ]
+                        sum += utxos[i]['value']
                     }
 
                     if(!value){
-                        amount = -fee
-                        for (let i = 0; i < utxos.length; i++) {
-                            amount += utxos[i]['value']
+                        amount = -fee + sum
+                    }else{
+                        if(amount > sum){
+                            resolve(11)
+                            return
                         }
                     }
+
                     //we are building the transaction 
                     let tx = new bch.Transaction() //use bitcore-lib-cash to create a transaction
                         .from(utxo)

@@ -5,7 +5,7 @@ let axios = require('axios')
 let logger = require('../../Logging/logger')
 
 exports.trans = async (addressNo, addressTo, value) => {
-    let error = [1,2,3,4,5,6,7,8,9,10]
+    let error = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     let path = "BSV/Trans"
     //retrieving bsv address & private key
     let address = bsvWallet.wallet(addressNo)
@@ -23,13 +23,13 @@ exports.trans = async (addressNo, addressTo, value) => {
 
 
     let i = 0, status
-    while(i<6 ){
-        if(i%2 == 0){
+    while (i < 6) {
+        if (i % 2 == 0) {
             status = await server1(address, addressTo, amount, fee, WIF, path, value)
-        }else{
+        } else {
             status = await server2(address, addressTo, amount, fee, WIF, path, value)
         }
-        if(!error.includes(status)) break
+        if (!error.includes(status)) break
         i++
     }
 
@@ -45,12 +45,19 @@ const server1 = async (address, addressTo, amount, fee, WIF, path, value) => {
         axios.get('https://api.mattercloud.net/api/v3/main/address/' + address + '/utxo')
             .then((res) => {
                 if (res.data) {
-                    let utxos = res.data
+                    let utxos = res.data, sum = 0
 
-                    if(!value){
-                        amount = -fee
-                        for (let i = 0; i < utxos.length; i++) {
-                            amount += utxos[i]['satoshiss']
+                    for (let i = 0; i < utxos.length; i++) {
+                        sum += utxos[i]['satoshis']
+                    }
+
+
+                    if (!value) {
+                        amount = -fee + sum
+                    } else {
+                        if (amount > sum) {
+                            resolve(11)
+                            return
                         }
                     }
 
@@ -115,12 +122,18 @@ const server2 = async (address, addressTo, amount, fee, WIF, path, value) => {
         axios.get('https://api.mattercloud.net/api/v3/main/address/' + address + '/utxo')
             .then((res) => {
                 if (res.data) {
-                    let utxos = res.data
+                    let utxos = res.data, sum = 0
 
-                    if(!value){
-                        amount = -fee
-                        for (let i = 0; i < utxos.length; i++) {
-                            amount += utxos[i]['satoshiss']
+                    for (let i = 0; i < utxos.length; i++) {
+                        sum += utxos[i]['satoshis']
+                    }
+
+                    if (!value) {
+                        amount = -fee + sum
+                    } else {
+                        if (amount > sum) {
+                            resolve(11)
+                            return
                         }
                     }
 
