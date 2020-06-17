@@ -7,8 +7,10 @@ let abi = require('human-standard-token-abi')
 let logger = require('../../Logging/logger')
 
 exports.trans = async (addressNo, addressTo, value, tokenAddress, decimals, ticker) => {
-    let error = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    let path = ticker+"/Trans", request
+    let UTXOError = [4, 5, 6]
+    let BroadcastError = [7, 8, 9, 10]
+    let UTXOErrorFinal = [4, 5, 6, 11]
+
     //retrieving eth address & private key
     let address = ethWallet.wallet(addressNo)
     let privateKey = Buffer.from(ethWallet.privKey(addressNo), 'hex')
@@ -19,24 +21,42 @@ exports.trans = async (addressNo, addressTo, value, tokenAddress, decimals, tick
     }
 
     //fees needs changing
-    let i = 0, status
+    let i = 0, status, tx
     while (i < 6) {
         if (i % 2 == 0) {
-            status = await server1(address, addressTo, amount, privateKey, path, value, request, tokenAddress)
+            tx = await UTXO1(address, addressTo, amount, privateKey, value, tokenAddress, ticker)
         } else {
-            status = await server2(address, addressTo, amount, privateKey, path, value, request, tokenAddress)
+            tx = await UTXO2(address, addressTo, amount, privateKey, value, tokenAddress, ticker)
         }
-        if (!error.includes(status)) break
+        console.log(`i:${i}, status:${tx}`)
+        if (!UTXOError.includes(tx)) break
+        i++
+    }
+
+    if (UTXOErrorFinal.includes(tx)) return tx
+
+    i = 0
+
+    while (i < 6) {
+        if (i % 2 == 0) {
+            status = await server1(tx,ticker)
+        } else {
+            status = await server2(tx,ticker)
+        }
+        console.log(`i:${i}, status:${status}`)
+        if (!BroadcastError.includes(status)) break
         i++
     }
 
     return status
 
+
 }
 
-const server1 = async (address, addressTo, amount, privateKey , path, value, request, tokenAddress) => {
+const UTXO1 = async (address, addressTo, amount, privateKey, value, tokenAddress, ticker) => {
+    let path = ticker + "/Utxo"
 
-    let gasPrice = 23000000000
+    let gasPrice = 45000000000
     let gasLimit = 21000
 
     let web3 = new Web3('wss://mainnet.infura.io/ws/v3/4fe5d399245448ce9cd6783fc045a4cb')
@@ -55,10 +75,10 @@ const server1 = async (address, addressTo, amount, privateKey , path, value, req
                     amount = await contract.methods.balanceOf(address).call()
                     amount = Number(amount)
                     console.log(amount)
-                }else{
+                } else {
                     let sum = await contract.methods.balanceOf(address).call()
-                    console.log(sum + " "+ amount)
-                    if(amount > sum){
+                    console.log(sum + " " + amount)
+                    if (amount > sum) {
                         resolve(11)
                         return
                     }
@@ -80,45 +100,23 @@ const server1 = async (address, addressTo, amount, privateKey , path, value, req
                 tx.sign(privateKey);
                 const serializedTx = tx.serialize()
 
-                let url = 'https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex=' + serializedTx.toString('hex') + '&apikey=RT7M3E86XGZ2F53S8KFNWDASKH333FXGPP'
-
-                request = "\nPOST " + url
-
-                axios.post(url).then(resp => {
-                    logger.log(path, request, JSON.stringify(resp.data))
-                    if (resp.data.error) {
-                        resolve(8)
-                    }
-                    else {
-                        resolve(resp.data.result)
-                    }
-                }).catch(err => {
-                    if (err.isAxiosError) {
-                        logger.log(path, request, JSON.stringify(err.response))
-                        resolve(7)
-                    } else {
-                        logger.log(path, request, err)
-                        resolve(9)
-                    }
-                })
-            })
-            .catch(e => {
+                resolve(serializedTx.toString('hex'))
+            }).catch(e => {
                 if (e.code == 1006) {
                     resolve(4)
                 } else {
                     resolve(6)
                 }
             })
-
-
     })
 
     return promise
 }
 
-const server2 = async (address, addressTo, amount, privateKey , path, value, request, tokenAddress) => {
+const UTXO2 = async (address, addressTo, amount, privateKey, value, tokenAddress, ticker) => {
+    let path = ticker + "/Utxo"
 
-    let gasPrice = 23000000000
+    let gasPrice = 45000000000
     let gasLimit = 21000
 
     let web3 = new Web3('https://sparkling-empty-wind.quiknode.pro/68dd0066be83ed81dccf915a619414d79c32260e/')
@@ -137,9 +135,10 @@ const server2 = async (address, addressTo, amount, privateKey , path, value, req
                     amount = await contract.methods.balanceOf(address).call()
                     amount = Number(amount)
                     console.log(amount)
-                }else{
+                } else {
                     let sum = await contract.methods.balanceOf(address).call()
-                    if(amount > sum){
+                    console.log(sum + " " + amount)
+                    if (amount > sum) {
                         resolve(11)
                         return
                     }
@@ -161,35 +160,82 @@ const server2 = async (address, addressTo, amount, privateKey , path, value, req
                 tx.sign(privateKey);
                 const serializedTx = tx.serialize()
 
-                let url = 'https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex=' + serializedTx.toString('hex') + '&apikey=RT7M3E86XGZ2F53S8KFNWDASKH333FXGPP'
-
-                request = "\nPOST " + url
-
-                axios.post(url).then(resp => {
-                    logger.log(path, request, JSON.stringify(resp.data))
-                    if (resp.data.error) {
-                        resolve(8)
-                    }
-                    else {
-                        resolve(resp.data.result)
-                    }
-                }).catch(err => {
-                    if (err.isAxiosError) {
-                        logger.log(path, request, JSON.stringify(err.response))
-                        resolve(7)
-                    } else {
-                        logger.log(path, request, err)
-                        resolve(9)
-                    }
-                })
-            })
-            .catch(e => {
+                resolve(serializedTx.toString('hex'))
+            }).catch(e => {
                 if (e.code == 1006) {
                     resolve(4)
                 } else {
                     resolve(6)
                 }
             })
+    })
+
+    return promise
+}
+
+const server1 = async (tx, ticker) => {
+
+    let path = ticker + "/Trans"
+
+    let promise = new Promise((resolve, reject) => {
+
+
+        let url = 'https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex=' + tx + '&apikey=RT7M3E86XGZ2F53S8KFNWDASKH333FXGPP'
+        let request = "\nPOST " + url
+
+        axios.post(url).then(resp => {
+            logger.log(path, request, JSON.stringify(resp.data))
+            if (resp.data.error) {
+                resolve(8)
+            }
+            else {
+                resolve(resp.data.result)
+            }
+        }).catch(err => {
+            if (err.isAxiosError) {
+                logger.log(path, request, JSON.stringify(err.response))
+                resolve(7)
+            } else {
+                logger.log(path, request, err)
+                resolve(9)
+            }
+        })
+
+
+
+    })
+
+    return promise
+}
+
+const server2 = async (tx, ticker) => {
+
+    let path = ticker + "/Trans"
+
+    let promise = new Promise((resolve, reject) => {
+
+
+        let url = 'https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex=' + tx + '&apikey=RT7M3E86XGZ2F53S8KFNWDASKH333FXGPP'
+        let request = "\nPOST " + url
+
+        axios.post(url).then(resp => {
+            logger.log(path, request, JSON.stringify(resp.data))
+            if (resp.data.error) {
+                resolve(8)
+            }
+            else {
+                resolve(resp.data.result)
+            }
+        }).catch(err => {
+            if (err.isAxiosError) {
+                logger.log(path, request, JSON.stringify(err.response))
+                resolve(7)
+            } else {
+                logger.log(path, request, err)
+                resolve(9)
+            }
+        })
+
 
 
     })
