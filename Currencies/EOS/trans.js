@@ -73,7 +73,7 @@ const server1 = async (addressTo, path, value, signatureProvider, request, memo)
             }).then(result => {
                 logger.log(path, request, JSON.stringify(result))
                 if (result.transaction_id) {
-                    resolve(result.transaction_id)
+                    resolve({ status: 'OK', tx: result.transaction_id })
                 } else {
                     resolve(8)
                 }
@@ -135,7 +135,7 @@ const server2 = async (addressTo, path, value, signatureProvider, request, memo)
             }).then(result => {
                 logger.log(path, request, JSON.stringify(result))
                 if (result.transaction_id) {
-                    resolve(result.transaction_id)
+                    resolve({ status: 'OK', tx: result.transaction_id })
                 } else {
                     resolve(8)
                 }

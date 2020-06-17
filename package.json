@@ -33,6 +33,7 @@
     "litecore-lib": "^0.13.22",
     "lodash": "^4.17.15",
     "node-fetch": "^2.6.0",
+    "npm-check-updates": "^7.0.1",
     "request": "^2.88.2",
     "right-now": "^1.0.0",
     "secure-random": "^1.1.2",

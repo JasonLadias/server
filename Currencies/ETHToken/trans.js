@@ -189,7 +189,7 @@ const server1 = async (tx, ticker) => {
                 resolve(8)
             }
             else {
-                resolve(resp.data.result)
+                resolve({status: 'OK',tx:resp.data.result})
             }
         }).catch(err => {
             if (err.isAxiosError) {
@@ -224,7 +224,7 @@ const server2 = async (tx, ticker) => {
                 resolve(8)
             }
             else {
-                resolve(resp.data.result)
+                resolve({status: 'OK',tx:resp.data.result})
             }
         }).catch(err => {
             if (err.isAxiosError) {

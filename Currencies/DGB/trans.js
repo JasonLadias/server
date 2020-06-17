@@ -194,7 +194,7 @@ const server1 = async (tx) => {
             .then((res) => {
                 logger.log(path, JSON.stringify(req), JSON.stringify(res.data))
                 if (res.data.data.transaction_hash) {
-                    resolve(res.data.data.transaction_hash)
+                    resolve({status:'OK',tx:res.data.data.transaction_hash})
                 } else {
                     resolve(8)
                 }
@@ -233,7 +233,7 @@ const server2 = async (tx) => {
             .then((res) => {
                 logger.log(path, JSON.stringify(req), JSON.stringify(res.data))
                 if (res.data.data.transaction_hash) {
-                    resolve(res.data.data.transaction_hash)
+                    resolve({status:'OK',tx:res.data.data.transaction_hash})
                 } else {
                     resolve(8)
                 }
