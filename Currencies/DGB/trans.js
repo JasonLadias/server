@@ -59,12 +59,14 @@ const UTXO1 = async (address, addressTo, amount, fee, WIF, value) => {
 
     let promise = new Promise((resolve, reject) => {
 
+        let req = `https://digiexplorer.info/api/addr/${address}/utxo`
 
-        axios.get('https://digiexplorer.info/api/addr/' + address + '/utxo')
+        axios.get(req)
             .then((res) => {
 
-                console.log(res.data)
                 if (res.data) {
+
+                    logger.log(path, `GET ${req}`, JSON.stringify(res.data))
 
                     let utxos = res.data, sum = 0
 
@@ -92,13 +94,16 @@ const UTXO1 = async (address, addressTo, amount, fee, WIF, value) => {
                     resolve(tx.toString('hex'))
 
                 } else {
+                    logger.log(path, `GET ${req}`, res)
                     resolve(5)
                 }
             })
             .catch((err) => {
                 if (err.isAxiosError) {
+                    logger.log(path, `GET ${req}`, JSON.stringify(err.data))
                     resolve(4)
                 } else {
+                    logger.log(path, `GET ${req}`, err)
                     resolve(6)
                 }
             })
@@ -115,12 +120,14 @@ const UTXO2 = async (address, addressTo, amount, fee, WIF, value) => {
 
     let promise = new Promise((resolve, reject) => {
 
+        let req = `https://digiexplorer.info/api/addr/${address}/utxo`
 
-        axios.get('https://digiexplorer.info/api/addr/' + address + '/utxo')
+        axios.get(req)
             .then((res) => {
 
-                console.log(res.data)
                 if (res.data) {
+
+                    logger.log(path, `GET ${req}`, JSON.stringify(res.data))
 
                     let utxos = res.data, sum = 0
 
@@ -148,13 +155,16 @@ const UTXO2 = async (address, addressTo, amount, fee, WIF, value) => {
                     resolve(tx.toString('hex'))
 
                 } else {
+                    logger.log(path, `GET ${req}`, res)
                     resolve(5)
                 }
             })
             .catch((err) => {
                 if (err.isAxiosError) {
+                    logger.log(path, `GET ${req}`, JSON.stringify(err.data))
                     resolve(4)
                 } else {
+                    logger.log(path, `GET ${req}`, err)
                     resolve(6)
                 }
             })

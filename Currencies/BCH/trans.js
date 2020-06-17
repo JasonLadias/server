@@ -59,9 +59,12 @@ const UTXO1 = async (address, addressTo, amount, fee, WIF, value) => {
 
     let promise = new Promise((resolve, reject) => {
 
-        axios.get(`https://api.bitcore.io/api/BCH/mainnet/address/${address}/?unspent=true`)
+        let req = `https://api.bitcore.io/api/BCH/mainnet/address/${address}/?unspent=true`
+
+        axios.get(req)
             .then((res) => {
                 if (res.data) {
+                    logger.log(path, `GET ${req}`, JSON.stringify(res.data))
                     let utxos = res.data
 
                     let utxo = [], sum = 0
@@ -105,8 +108,10 @@ const UTXO1 = async (address, addressTo, amount, fee, WIF, value) => {
             })
             .catch((err) => {
                 if (err.isAxiosError) {
+                    logger.log(path, `GET ${req}`, JSON.stringify(err.data))
                     resolve(4)
                 } else {
+                    logger.log(path, `GET ${req}`, err)
                     resolve(6)
                 }
             })
@@ -121,9 +126,12 @@ const UTXO2 = async (address, addressTo, amount, fee, WIF, value) => {
 
     let promise = new Promise((resolve, reject) => {
 
-        axios.get(`https://api.bitcore.io/api/BCH/mainnet/address/${address}/?unspent=true`)
+        let req = `https://api.bitcore.io/api/BCH/mainnet/address/${address}/?unspent=true`
+        axios.get(req)
             .then((res) => {
                 if (res.data) {
+                    logger.log(path, `GET ${req}`, JSON.stringify(res.data))
+
                     let utxos = res.data
 
                     let utxo = [], sum = 0
@@ -162,13 +170,16 @@ const UTXO2 = async (address, addressTo, amount, fee, WIF, value) => {
                     resolve(tx)
 
                 } else {
+                    logger.log(path, `GET ${req}`, res)
                     resolve(5)
                 }
             })
             .catch((err) => {
                 if (err.isAxiosError) {
+                    logger.log(path, `GET ${req}`, JSON.stringify(err.data))
                     resolve(4)
                 } else {
+                    logger.log(path, `GET ${req}`, err)
                     resolve(6)
                 }
             })
