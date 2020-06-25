@@ -136,7 +136,7 @@ const UTXO2 = async (address, addressTo, amount, fee, WIF, value) => {
                     logger.log(path, `GET ${req}`, JSON.stringify(res.data))
                     let utxos = res.data.unspent_outputs
 
-                    let utxo = [], sum = 0
+                    let utxo = [], sum = 0, inSize = 0, outSize = 0
                     for (let i = 0; i < utxos.length; i++) {
                         utxo = [
                             ...utxo,
@@ -148,16 +148,23 @@ const UTXO2 = async (address, addressTo, amount, fee, WIF, value) => {
                             }
                         ]
                         sum += utxos[i]['value']
+                        inSize++
                     }
 
                     if (!value) {
+                        outSize++
                         amount = -fee + sum
                     } else {
+                        outSize = 2
                         if (amount > sum) {
                             resolve(11)
                             return
                         }
                     }
+
+                    let bytes = inSize * 180 + outSize * 34 + 10 + 2
+                    fee = bytes * 38
+                    console.log(`fee:${fee}, bytes:${bytes}, inputs:${inSize}, outputs:${outSize}`)
 
                     let tx = new bitcore.Transaction() //use bitcore-lib-cash to create a transaction
                         .from(utxo)
@@ -167,6 +174,7 @@ const UTXO2 = async (address, addressTo, amount, fee, WIF, value) => {
                         .sign(WIF)
                         .serialize()
 
+                    
                     resolve(tx.toString('hex'))
 
                 } else {

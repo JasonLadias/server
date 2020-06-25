@@ -6,6 +6,7 @@ const dgbTrans = require('../Currencies/DGB/trans')
 const ethTrans = require('../Currencies/ETH/trans')
 const ethTokenTrans = require('../Currencies/ETHToken/trans')
 const eosTrans = require('../Currencies/EOS/trans')
+const tokenArray = require('../Currencies/ETHToken/tokenArray')
 
 exports.postTransaction = async (req, res, next) => {
     //Geting the coinName from the POST request
@@ -22,12 +23,23 @@ exports.postTransaction = async (req, res, next) => {
         10 : 'Value not set',
         11 : 'Amount not available',
     }
+    
+    let tokenName = tokenArray.tokenName()
+    let tokenDataObject
     let coinName = req.body.coinName
     let addressNo = req.body.addressNo
     let addressTo = req.body.addressTo
     let value = req.body.value
     let memo
     let status
+    let token
+
+    
+    if(tokenName.includes(coinName)){
+        tokenDataObject = tokenArray.tokenData()
+        token = coinName
+        coinName = 'TOKEN'
+    } 
     //Checking if the coinName matches a valid coin
     switch (coinName) {
         case 'BTC':
@@ -107,36 +119,17 @@ exports.postTransaction = async (req, res, next) => {
             }
             break
         //ETH Tokens
-        case 'POWR':
-            status = await ethTokenTrans.trans(addressNo, addressTo, value, '0x595832f8fc6bf59c85c527fec3740a1b7a361269', 6, 'POWR')
+        case 'TOKEN':
+            status = await ethTokenTrans.trans(addressNo, addressTo, value, tokenDataObject[token].tokenAddress ,tokenDataObject[token].decimals, token)
             if(status.status == 'OK'){
-                res.send(JSON.stringify({ status: "OK", coinName: coinName, addressNo: addressNo, addressTo: addressTo, value: value, txid: status.tx }))
+                res.send(JSON.stringify({ status: "OK", coinName: token, addressNo: addressNo, addressTo: addressTo, value: value, txid: status.tx }))
             }else if(error[status]){
                 res.send(JSON.stringify({ status: "Error", type: status, reason: error[status] }))
             }else{
                 res.send(JSON.stringify({ status: "Error", type: 12, reason: "Something unexpected happened" }))
             }
             break
-        case 'OMG':
-            status = await ethTokenTrans.trans(addressNo, addressTo, value, '0xd26114cd6EE289AccF82350c8d8487fedB8A0C07', 18, 'OMG')
-            if(status.status == 'OK'){
-                res.send(JSON.stringify({ status: "OK", coinName: coinName, addressNo: addressNo, addressTo: addressTo, value: value, txid: status.tx }))
-            }else if(error[status]){
-                res.send(JSON.stringify({ status: "Error", type: status, reason: error[status] }))
-            }else{
-                res.send(JSON.stringify({ status: "Error", type: 12, reason: "Something unexpected happened" }))
-            }
-            break
-        case 'LEND':
-            status = await ethTokenTrans.trans(addressNo, addressTo, value, '0x80fB784B7eD66730e8b1DBd9820aFD29931aab03', 18, 'LEND')
-            if(status.status == 'OK'){
-                res.send(JSON.stringify({ status: "OK", coinName: coinName, addressNo: addressNo, addressTo: addressTo, value: value, txid: status.tx }))
-            }else if(error[status]){
-                res.send(JSON.stringify({ status: "Error", type: status, reason: error[status] }))
-            }else{
-                res.send(JSON.stringify({ status: "Error", type: 12, reason: "Something unexpected happened" }))
-            }
-            break
+        
         default:
             res.send(JSON.stringify({ status: "Error", type: "3", reason: "Coin Name does not exist" }))
     }

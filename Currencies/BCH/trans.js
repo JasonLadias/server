@@ -18,7 +18,7 @@ exports.trans = async (addressNo, addressTo, value) => {
         amount = ~~amount
     }
     //fees needs changing
-    let fee = 2000
+    let fee = 380
     let WIF = privateKey.toWIF('hex')
 
     let i = 0, tx, status
